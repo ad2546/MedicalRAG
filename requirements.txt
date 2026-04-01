@@ -1,0 +1,38 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# Database
+asyncpg==0.30.0
+sqlalchemy[asyncio]==2.0.36
+pgvector==0.3.6
+psycopg2-binary==2.9.10
+
+# Embeddings
+sentence-transformers>=3.3.1
+torch>=2.5.1  # version resolved by uv based on your Python ABI
+
+# LLM — OCI Generative AI (OpenAI-compatible endpoint)
+openai>=1.59.3
+oci>=2.126.0
+
+# Validation
+pydantic==2.10.3
+pydantic-settings==2.7.0
+guardrails-ai==0.6.2
+
+# Observability
+monocle-apptrace>=0.7.3  # Okahu Cloud tracing (rebranded from okahu-apptrace)
+opentelemetry-api==1.29.0
+opentelemetry-sdk==1.29.0
+
+# Utilities
+python-dotenv==1.0.1
+httpx==0.28.1
+tenacity==9.0.0
+
+# Testing
+pytest==8.3.4
+pytest-asyncio==0.24.0
+httpx==0.28.1
+pytest-cov==6.0.0

@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedicalRAG — Clinical Differential Diagnosis</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #F8F5F0;
+      --surface:      #FFFFFF;
+      --surface-2:    #F1EDE6;
+      --border:       #DDD8CF;
+      --border-hover: #C5BEB3;
+      --text-dim:     #A09890;
+      --text:         #6B6058;
+      --text-mid:     #3D3530;
+      --text-bright:  #1A1410;
+      --accent:       #B91C1C;
+      --accent-dim:   rgba(185,28,28,0.07);
+      --high:         #166534;
+      --high-dim:     rgba(22,101,52,0.07);
+      --medium:       #92400E;
+      --medium-dim:   rgba(146,64,14,0.07);
+      --low:          #B91C1C;
+      --low-dim:      rgba(185,28,28,0.07);
+      --radius:       3px;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-mid);
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      font-weight: 400;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(248,245,240,0.96);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+
+    .app-name {
+      font-family: 'Spectral', Georgia, serif;
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+    .app-name span { color: var(--accent); }
+
+    .env-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .health-indicator {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .health-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      transition: background 0.3s;
+    }
+    .health-dot.online  { background: var(--high); }
+    .health-dot.offline { background: var(--accent); }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .quota-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      font-weight: 500;
+      padding: 3px 8px;
+      border-radius: 2px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      min-width: 130px;
+      text-align: center;
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-mid);
+      cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.74rem;
+      min-height: 32px;
+      padding: 0 10px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── LAYOUT ── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      overflow: hidden;
+      height: calc(100vh - 54px);
+    }
+
+    /* ── FORM PANEL ── */
+    .form-panel {
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      background: var(--surface);
+    }
+
+    .form-panel::-webkit-scrollbar { width: 3px; }
+    .form-panel::-webkit-scrollbar-track { background: transparent; }
+    .form-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-title {
+      font-family: 'Spectral', serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text-bright);
+      letter-spacing: -0.01em;
+    }
+
+    /* ── FORM SECTIONS ── */
+    .form-section { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .section-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── INPUTS ── */
+    input[type="text"],
+    input[type="number"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-bright);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.875rem;
+      padding: 9px 11px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      min-height: 44px;
+    }
+    input:focus {
+      border-color: var(--text-mid);
+      box-shadow: 0 0 0 3px rgba(26,20,16,0.06);
+    }
+    input::placeholder { color: var(--text-dim); }
+
+    /* ── VITALS GRID ── */
+    .vitals-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+
+    .field-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    /* ── TAG INPUT ── */
+    .tag-input-wrapper {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      min-height: 76px;
+      cursor: text;
+      transition: border-color 0.15s;
+    }
+    .tag-input-wrapper:focus-within {
+      border-color: var(--text-mid);
+      box-shadow: 0 0 0 3px rgba(26,20,16,0.06);
+    }
+
+    .tag {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      color: var(--text-mid);
+    }
+
+    .tag-remove {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      min-width: 14px;
+      min-height: 14px;
+    }
+    .tag-remove:hover { color: var(--accent); }
+
+    .tag-input {
+      background: none;
+      border: none;
+      min-width: 140px;
+      flex: 1;
+      font-size: 0.875rem;
+      color: var(--text-bright);
+      outline: none;
+      padding: 3px 4px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      min-height: unset;
+    }
+
+    /* ── TOGGLE ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+    }
+
+    .toggle-label { font-size: 0.875rem; color: var(--text-mid); }
+
+    .toggle { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+    .toggle-track {
+      position: absolute;
+      width: 36px; height: 20px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: calc(50% - 6px); left: calc(50% - 15px);
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      transition: transform 0.2s, background 0.2s;
+      pointer-events: none;
+    }
+
+    .toggle input:checked ~ .toggle-track { background: var(--accent-dim); border-color: var(--accent); }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(16px); background: var(--accent); }
+    .toggle input:focus-visible ~ .toggle-track { outline: 2px solid var(--text-mid); outline-offset: 2px; }
+
+    /* ── LABS ── */
+    .labs-list { display: flex; flex-direction: column; gap: 5px; }
+
+    .lab-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 36px;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .lab-remove {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-dim);
+      cursor: pointer;
+      width: 36px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .lab-remove:hover { border-color: var(--accent); color: var(--accent); }
+
+    .add-btn {
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      font-family: 'IBM Plex Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: border-color 0.15s, color 0.15s;
+      min-height: 44px;
+      width: 100%;
+    }
+    .add-btn:hover { border-color: var(--text-mid); color: var(--text-mid); }
+
+    /* ── SUBMIT ── */
+    .submit-btn {
+      background: var(--text-bright);
+      border: none;
+      border-radius: var(--radius);
+      color: var(--bg);
+      cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 12px 24px;
+      width: 100%;
+      min-height: 48px;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.02em;
+    }
+    .submit-btn:hover:not(:disabled) { background: var(--accent); }
+    .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .submit-btn:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 3px; }
+
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(248,245,240,0.3);
+      border-top-color: var(--bg);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .submit-btn.loading .spinner   { display: block; }
+    .submit-btn.loading .btn-text  { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-error {
+      font-size: 0.78rem;
+      color: var(--accent);
+      text-align: center;
+      padding: 4px 0;
+      display: none;
+    }
+
+    .example-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      transition: border-color 0.15s, color 0.15s;
+      min-height: 44px;
+    }
+    .example-btn:hover { border-color: var(--text-mid); color: var(--text-mid); }
+    .example-btn:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
+
+    /* ── RESULTS PANEL ── */
+    .results-panel {
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+    }
+    .results-panel::-webkit-scrollbar { width: 3px; }
+    .results-panel::-webkit-scrollbar-track { background: transparent; }
+    .results-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .empty-icon { width: 48px; height: 48px; color: var(--border); }
+
+    .empty-state h2 {
+      font-family: 'Spectral', serif;
+      font-weight: 500;
+      font-size: 1.3rem;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .empty-state p {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      max-width: 300px;
+      line-height: 1.7;
+    }
+
+    /* ── RESULTS CONTENT ── */
+    .results-content { display: none; flex-direction: column; flex: 1; }
+    .results-content.visible { display: flex; }
+
+    /* ── CASE META ── */
+    .case-meta {
+      padding: 1.25rem 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .meta-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+    }
+
+    .meta-value {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text-bright);
+    }
+
+    /* ── STAGE TABS ── */
+    .stage-tabs {
+      display: flex;
+      padding: 0 2.5rem;
+      border-bottom: 1px solid var(--border);
+      gap: 0;
+      background: var(--surface);
+    }
+
+    .stage-tab {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 14px 20px 12px;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stage-tab:hover { color: var(--text-mid); }
+    .stage-tab.active { color: var(--text-bright); border-bottom-color: var(--accent); }
+    .stage-tab:focus-visible { outline: 2px solid var(--text-bright); outline-offset: -2px; }
+
+    .stage-tab .tab-count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 1px 5px;
+      color: var(--text-dim);
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .stage-tab.active .tab-count {
+      background: var(--accent-dim);
+      border-color: rgba(185,28,28,0.18);
+      color: var(--accent);
+    }
+
+    /* ── STAGE CONTENT ── */
+    .stage-content {
+      padding: 2rem 2.5rem;
+      display: none;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .stage-content.active { display: flex; }
+
+    /* ── DIAGNOSIS CARD ── */
+    .diagnosis-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem 1.75rem 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+      position: relative;
+      overflow: hidden;
+      animation: cardIn 0.35s ease both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .diagnosis-card:nth-child(1) { animation-delay: 0.04s; }
+    .diagnosis-card:nth-child(2) { animation-delay: 0.09s; }
+    .diagnosis-card:nth-child(3) { animation-delay: 0.14s; }
+    .diagnosis-card:nth-child(4) { animation-delay: 0.19s; }
+
+    /* Large watermark rank number */
+    .diagnosis-card::before {
+      content: attr(data-rank);
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Spectral', serif;
+      font-size: 5.5rem;
+      font-weight: 700;
+      color: var(--border);
+      line-height: 1;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .diagnosis-card.high   { border-left-color: var(--high); }
+    .diagnosis-card.medium { border-left-color: var(--medium); }
+    .diagnosis-card.low    { border-left-color: var(--low); }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    .card-rank {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .condition-name {
+      font-family: 'Spectral', Georgia, serif;
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: var(--text-bright);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+
+    .confidence-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      border-radius: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+
+    .confidence-badge.high   { background: var(--high-dim);   color: var(--high);   border: 1px solid rgba(22,101,52,0.2); }
+    .confidence-badge.medium { background: var(--medium-dim); color: var(--medium); border: 1px solid rgba(146,64,14,0.2); }
+    .confidence-badge.low    { background: var(--low-dim);    color: var(--low);    border: 1px solid rgba(185,28,28,0.2); }
+
+    .reasoning-text {
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.7;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    .evidence-section { display: flex; flex-direction: column; gap: 6px; }
+
+    .evidence-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+    }
+
+    .evidence-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .evidence-chip {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      padding: 3px 7px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      min-height: 22px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .evidence-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .evidence-chip.loading { opacity: 0.5; cursor: wait; }
+
+    /* ── CITATION POPOVER ── */
+    .citation-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: transparent;
+    }
+
+    .citation-popover {
+      position: fixed;
+      z-index: 201;
+      background: var(--surface);
+      border: 1px solid var(--border-hover);
+      border-radius: 4px;
+      padding: 1.25rem;
+      width: 380px;
+      max-width: calc(100vw - 2rem);
+      box-shadow: 0 8px 32px rgba(26,20,16,0.14), 0 2px 8px rgba(26,20,16,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .citation-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .citation-meta { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    .citation-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-dim);
+    }
+
+    .citation-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 2px;
+      display: flex;
+      align-items: center;
+      min-width: 22px;
+      min-height: 22px;
+      flex-shrink: 0;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .citation-close:hover { background: var(--surface-2); color: var(--text-bright); }
+
+    .citation-source {
+      font-family: 'Spectral', serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-mid);
+      line-height: 1.4;
+    }
+
+    .citation-content {
+      font-size: 0.8rem;
+      color: var(--text);
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .citation-id {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--text-dim);
+    }
+
+    /* ── CHAT FAB ── */
+    .chat-fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--text-bright);
+      border: none;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(26,20,16,0.22);
+      z-index: 150;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .chat-fab:hover { background: var(--accent); transform: scale(1.05); }
+    .chat-fab:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 3px; }
+    .chat-fab.visible { display: flex; }
+
+    /* ── CHAT PANEL ── */
+    .chat-panel {
+      position: fixed;
+      bottom: 5rem;
+      right: 1.5rem;
+      width: 400px;
+      max-width: calc(100vw - 2rem);
+      height: 520px;
+      max-height: calc(100vh - 8rem);
+      background: var(--surface);
+      border: 1px solid var(--border-hover);
+      border-radius: 6px;
+      box-shadow: 0 16px 48px rgba(26,20,16,0.16), 0 4px 12px rgba(26,20,16,0.07);
+      z-index: 151;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-panel.open { display: flex; }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--surface-2);
+    }
+
+    .chat-title {
+      font-family: 'Spectral', serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .chat-context-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      padding: 2px 6px;
+      border-radius: 2px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(185,28,28,0.18);
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .chat-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      min-width: 28px;
+      min-height: 28px;
+      border-radius: 3px;
+      transition: background 0.15s, color 0.15s;
+    }
+    .chat-close:hover { background: var(--border); color: var(--text-bright); }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+    }
+    .chat-messages::-webkit-scrollbar { width: 3px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 88%;
+    }
+    .chat-msg.user      { align-self: flex-end; align-items: flex-end; }
+    .chat-msg.assistant { align-self: flex-start; }
+
+    .chat-bubble {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      line-height: 1.65;
+    }
+
+    .chat-msg.user .chat-bubble {
+      background: var(--text-bright);
+      color: var(--bg);
+      border-bottom-right-radius: 2px;
+    }
+
+    .chat-msg.assistant .chat-bubble {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-mid);
+      border-bottom-left-radius: 2px;
+    }
+
+    .chat-msg-time {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      padding: 0 4px;
+    }
+
+    .chat-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .chat-typing {
+      align-self: flex-start;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      border-bottom-left-radius: 2px;
+      padding: 10px 14px;
+      display: none;
+    }
+    .chat-typing.visible { display: flex; gap: 4px; align-items: center; }
+    .chat-typing span {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      animation: bounce 1.2s infinite;
+    }
+    .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 0.875rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-bright);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.84rem;
+      padding: 10px 12px;
+      outline: none;
+      resize: none;
+      min-height: 44px;
+      max-height: 100px;
+      transition: border-color 0.15s;
+      line-height: 1.5;
+    }
+    .chat-input:focus {
+      border-color: var(--text-mid);
+      box-shadow: 0 0 0 3px rgba(26,20,16,0.06);
+    }
+    .chat-input::placeholder { color: var(--text-dim); }
+
+    .chat-send {
+      background: var(--text-bright);
+      border: none;
+      border-radius: 4px;
+      color: var(--bg);
+      cursor: pointer;
+      width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .chat-send:hover:not(:disabled) { background: var(--accent); }
+    .chat-send:disabled { opacity: 0.35; cursor: not-allowed; }
+    .chat-send:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      margin: 0 2.5rem 2.5rem;
+      padding: 12px 16px;
+      background: rgba(146,64,14,0.04);
+      border: 1px solid rgba(146,64,14,0.12);
+      border-left: 3px solid rgba(146,64,14,0.35);
+      border-radius: var(--radius);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.65;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    /* ── ERROR BANNER ── */
+    .error-banner {
+      margin: 1.5rem 2.5rem;
+      padding: 12px 16px;
+      background: var(--low-dim);
+      border: 1px solid rgba(185,28,28,0.2);
+      border-radius: var(--radius);
+      font-size: 0.84rem;
+      color: var(--accent);
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 820px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: auto;
+        overflow: visible;
+      }
+      .form-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow-y: visible;
+      }
+      .results-panel { min-height: 60vh; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="app-name">Medical<span>RAG</span></span>
+    <span class="env-badge" id="envBadge">Dev</span>
+  </div>
+  <div class="header-right">
+    <span class="quota-badge" id="quotaBadge">Requests: --/--</span>
+    <div class="health-indicator">
+      <div class="health-dot" id="healthDot"></div>
+      <span id="healthLabel">Checking</span>
+    </div>
+    <button class="logout-btn" type="button" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<main>
+  <!-- ── CASE FORM ── -->
+  <section class="form-panel" aria-label="Patient Case Form">
+
+    <div class="panel-header">
+      <span class="panel-title">Patient Case</span>
+      <button class="example-btn" onclick="loadExample()" type="button">Load example</button>
+    </div>
+
+    <div class="form-section">
+      <div class="section-label">Symptoms</div>
+      <div class="tag-input-wrapper" id="tagWrapper" onclick="document.getElementById('tagInput').focus()" role="group" aria-label="Symptoms">
+        <input type="text" id="tagInput" class="tag-input" placeholder="Type symptom, press Enter" aria-label="Add symptom">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-label">Vitals</div>
+      <div class="vitals-grid">
+        <div class="field-group">
+          <span class="field-label" id="lbl-bp">BP mmHg</span>
+          <input type="text" id="vitalBP" placeholder="120/80" aria-labelledby="lbl-bp">
+        </div>
+        <div class="field-group">
+          <span class="field-label" id="lbl-hr">HR bpm</span>
+          <input type="number" id="vitalHR" placeholder="72" min="0" max="300" aria-labelledby="lbl-hr">
+        </div>
+        <div class="field-group">
+          <span class="field-label" id="lbl-temp">Temp °C</span>
+          <input type="number" id="vitalTemp" placeholder="37.0" step="0.1" aria-labelledby="lbl-temp">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-label">History</div>
+      <div class="toggle-row">
+        <span class="toggle-label">Smoker</span>
+        <label class="toggle" aria-label="Smoker">
+          <input type="checkbox" id="smoker">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <div class="field-group">
+        <span class="field-label" id="lbl-prior">Prior conditions</span>
+        <input type="text" id="priorConditions" placeholder="Hypertension, Type 2 Diabetes..." aria-labelledby="lbl-prior">
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="section-label">Labs</div>
+      <div class="labs-list" id="labsList" aria-label="Lab values"></div>
+      <button class="add-btn" onclick="addLab()" type="button" aria-label="Add lab value">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <path d="M6.5 1.5v10M1.5 6.5h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Add lab value
+      </button>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:6px;">
+      <button class="submit-btn" id="submitBtn" onclick="submitCase()" type="button">
+        <span class="btn-text">Run Diagnosis</span>
+        <div class="spinner" aria-hidden="true"></div>
+      </button>
+      <div id="formError" class="form-error" role="alert"></div>
+    </div>
+
+  </section>
+
+  <!-- ── RESULTS PANEL ── -->
+  <section class="results-panel" aria-label="Diagnosis Results" aria-live="polite">
+
+    <div class="empty-state" id="emptyState">
+      <svg class="empty-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <rect x="8" y="6" width="32" height="36" rx="3" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M15 17h18M15 23h18M15 29h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="36" cy="36" r="8" fill="var(--bg)" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M33.5 36h5M36 33.5v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <h2>No case submitted</h2>
+      <p>Complete the patient case form and run the pipeline to view differential diagnoses here.</p>
+    </div>
+
+    <div class="results-content" id="resultsContent">
+
+      <div class="case-meta" id="caseMeta"></div>
+
+      <div class="stage-tabs" role="tablist" id="stageTabs">
+        <button class="stage-tab" role="tab" aria-selected="false" id="tab-btn-initial" onclick="switchTab('initial')">
+          Initial<span class="tab-count" id="count-initial">0</span>
+        </button>
+        <button class="stage-tab" role="tab" aria-selected="false" id="tab-btn-reflection" onclick="switchTab('reflection')">
+          Reflection<span class="tab-count" id="count-reflection">0</span>
+        </button>
+        <button class="stage-tab active" role="tab" aria-selected="true" id="tab-btn-final" onclick="switchTab('final')">
+          Final<span class="tab-count" id="count-final">0</span>
+        </button>
+      </div>
+
+      <div class="stage-content" id="tab-initial" role="tabpanel" aria-labelledby="tab-btn-initial"></div>
+      <div class="stage-content" id="tab-reflection" role="tabpanel" aria-labelledby="tab-btn-reflection"></div>
+      <div class="stage-content active" id="tab-final" role="tabpanel" aria-labelledby="tab-btn-final"></div>
+
+      <div class="disclaimer" id="disclaimer" role="note">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0;margin-top:1px" aria-hidden="true">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M7 4.5v3.5M7 9.5v.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <span></span>
+      </div>
+
+    </div>
+
+  </section>
+</main>
+
+<!-- ── CHAT FAB ── -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Open clinical chat" aria-expanded="false">
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+    <path d="M3 4a2 2 0 012-2h12a2 2 0 012 2v9a2 2 0 01-2 2H7l-4 4V4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+    <path d="M7 8h8M7 11.5h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+  </svg>
+</button>
+
+<!-- ── CHAT PANEL ── -->
+<div class="chat-panel" id="chatPanel" role="dialog" aria-label="Clinical chat" aria-modal="false">
+  <div class="chat-header">
+    <div class="chat-title">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M2 2.5a1.5 1.5 0 011.5-1.5h7A1.5 1.5 0 0112 2.5v6A1.5 1.5 0 0110.5 10H5L2 13V2.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      Clinical Assistant
+      <span class="chat-context-badge" id="chatContextBadge">No case</span>
+    </div>
+    <button class="chat-close" onclick="toggleChat()" aria-label="Close chat">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M2 2l10 10M12 2L2 12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-empty" id="chatEmpty">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" style="color:var(--border)" aria-hidden="true">
+        <path d="M4 5.5a2 2 0 012-2h20a2 2 0 012 2v14a2 2 0 01-2 2H10L4 28V5.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M10 11h12M10 15.5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      </svg>
+      <span>Ask anything about the case,<br>diagnosis, or evidence.</span>
+    </div>
+    <div class="chat-typing" id="chatTyping">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <div class="chat-input-row">
+    <textarea class="chat-input" id="chatInput" placeholder="Ask about this case..." rows="1"
+      aria-label="Chat message" onkeydown="chatKeydown(event)"></textarea>
+    <button class="chat-send" id="chatSend" onclick="sendChat()" aria-label="Send message">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M14 8L2 2l3 6-3 6 12-6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ── CITATION OVERLAY ── -->
+<div class="citation-overlay" id="citationOverlay" style="display:none" onclick="closeCitation()"></div>
+<div class="citation-popover" id="citationPopover" style="display:none" role="dialog" aria-label="Evidence citation">
+  <div class="citation-header">
+    <div class="citation-meta" id="citationMeta"></div>
+    <button class="citation-close" onclick="closeCitation()" aria-label="Close citation">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path d="M1.5 1.5l9 9M10.5 1.5l-9 9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+  <div class="citation-source" id="citationSource"></div>
+  <div class="citation-content" id="citationContent"></div>
+  <div class="citation-id" id="citationId"></div>
+</div>
+
+<script>
+  const API = window.location.origin;
+  let currentCaseId = null;
+  let authUser = null;
+  const chatHistory = [];
+
+  function updateQuotaBadge(remaining, requestLimit) {
+    const badge = document.getElementById('quotaBadge');
+    badge.textContent = `Requests: ${remaining}/${requestLimit}`;
+  }
+
+  function setUserQuota(userData) {
+    authUser = userData;
+    updateQuotaBadge(userData.remaining_requests, userData.request_limit);
+  }
+
+  async function ensureAuthenticated() {
+    try {
+      const res = await fetch(`${API}/auth/me`, {
+        credentials: 'include',
+        signal: AbortSignal.timeout(4000),
+      });
+      if (!res.ok) {
+        window.location.href = '/login';
+        return false;
+      }
+      const data = await res.json();
+      setUserQuota(data);
+      return true;
+    } catch {
+      window.location.href = '/login';
+      return false;
+    }
+  }
+
+  async function logout() {
+    try {
+      await fetch(`${API}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } finally {
+      window.location.href = '/login';
+    }
+  }
+
+  // ── Health check ──────────────────────────────────────
+  async function checkHealth() {
+    try {
+      const r = await fetch(`${API}/health`, {
+        signal: AbortSignal.timeout(3000),
+        credentials: 'include',
+      });
+      if (!r.ok) throw new Error();
+      const data = await r.json();
+      document.getElementById('healthDot').className = 'health-dot online';
+      document.getElementById('healthLabel').textContent = 'API online';
+      document.getElementById('envBadge').textContent = data.env || 'dev';
+    } catch {
+      document.getElementById('healthDot').className = 'health-dot offline';
+      document.getElementById('healthLabel').textContent = 'API offline';
+    }
+  }
+
+  (async function bootstrap() {
+    const ok = await ensureAuthenticated();
+    if (!ok) return;
+    await checkHealth();
+    setInterval(checkHealth, 20000);
+  })();
+
+  // ── Symptom tags ──────────────────────────────────────
+  const symptoms = [];
+
+  document.getElementById('tagInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value.trim().replace(/,$/, '');
+      if (val) addSymptom(val);
+      e.target.value = '';
+    } else if (e.key === 'Backspace' && !e.target.value && symptoms.length) {
+      removeSymptom(symptoms.length - 1);
+    }
+  });
+
+  function addSymptom(text) {
+    if (symptoms.includes(text)) return;
+    symptoms.push(text);
+    renderTags();
+  }
+
+  function removeSymptom(index) {
+    symptoms.splice(index, 1);
+    renderTags();
+  }
+
+  function renderTags() {
+    const wrapper = document.getElementById('tagWrapper');
+    const input   = document.getElementById('tagInput');
+    wrapper.innerHTML = '';
+    symptoms.forEach((s, i) => {
+      const tag = document.createElement('div');
+      tag.className = 'tag';
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'tag-remove';
+      removeBtn.type = 'button';
+      removeBtn.setAttribute('aria-label', `Remove ${s}`);
+      removeBtn.innerHTML = `<svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true"><path d="M1.5 1.5l6 6M7.5 1.5l-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+      removeBtn.onclick = () => removeSymptom(i);
+      tag.append(document.createTextNode(s), removeBtn);
+      wrapper.appendChild(tag);
+    });
+    wrapper.appendChild(input);
+  }
+
+  // ── Labs ──────────────────────────────────────────────
+  let labCount = 0;
+
+  function addLab() {
+    labCount++;
+    const id  = labCount;
+    const row = document.createElement('div');
+    row.className = 'lab-row';
+    row.id = `lab-${id}`;
+
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Lab name (e.g. troponin)';
+    nameInput.id = `lab-name-${id}`;
+    nameInput.setAttribute('aria-label', 'Lab name');
+
+    const valInput = document.createElement('input');
+    valInput.type = 'number';
+    valInput.placeholder = 'Value';
+    valInput.step = 'any';
+    valInput.id = `lab-val-${id}`;
+    valInput.setAttribute('aria-label', 'Lab value');
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'lab-remove';
+    removeBtn.setAttribute('aria-label', 'Remove lab value');
+    removeBtn.innerHTML = `<svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1.5 1.5l8 8M9.5 1.5l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+    removeBtn.onclick = () => row.remove();
+
+    row.append(nameInput, valInput, removeBtn);
+    document.getElementById('labsList').appendChild(row);
+    nameInput.focus();
+  }
+
+  function getLabs() {
+    const labs = {};
+    document.querySelectorAll('.lab-row').forEach(row => {
+      const id    = row.id.split('-')[1];
+      const name  = document.getElementById(`lab-name-${id}`)?.value?.trim();
+      const value = parseFloat(document.getElementById(`lab-val-${id}`)?.value);
+      if (name && !isNaN(value)) labs[name] = value;
+    });
+    return labs;
+  }
+
+  // ── Load example ──────────────────────────────────────
+  function loadExample() {
+    symptoms.length = 0;
+    ['chest pain', 'shortness of breath', 'diaphoresis'].forEach(addSymptom);
+    document.getElementById('vitalBP').value    = '90/60';
+    document.getElementById('vitalHR').value    = '110';
+    document.getElementById('vitalTemp').value  = '37.2';
+    document.getElementById('smoker').checked   = true;
+    document.getElementById('priorConditions').value = 'Hypertension';
+
+    document.getElementById('labsList').innerHTML = '';
+    labCount = 0;
+    addLab();
+    setTimeout(() => {
+      document.getElementById(`lab-name-1`).value = 'troponin';
+      document.getElementById(`lab-val-1`).value  = '0.8';
+      addLab();
+      setTimeout(() => {
+        document.getElementById(`lab-name-2`).value = 'wbc';
+        document.getElementById(`lab-val-2`).value  = '12.4';
+      }, 10);
+    }, 10);
+  }
+
+  // ── Submit ────────────────────────────────────────────
+  async function submitCase() {
+    const errorEl = document.getElementById('formError');
+    errorEl.style.display = 'none';
+
+    if (!symptoms.length) {
+      errorEl.textContent = 'Add at least one symptom before running the pipeline.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    const bp   = document.getElementById('vitalBP').value.trim();
+    const hr   = parseFloat(document.getElementById('vitalHR').value);
+    const temp = parseFloat(document.getElementById('vitalTemp').value);
+
+    const payload = {
+      symptoms,
+      vitals: {
+        ...(bp ? { bp } : {}),
+        ...(!isNaN(hr)   ? { hr }   : {}),
+        ...(!isNaN(temp) ? { temp } : {}),
+      },
+      history: {
+        smoker: document.getElementById('smoker').checked,
+        prior_conditions: document.getElementById('priorConditions').value
+          .split(',').map(s => s.trim()).filter(Boolean),
+      },
+      labs: getLabs(),
+    };
+
+    const btn = document.getElementById('submitBtn');
+    btn.classList.add('loading');
+    btn.disabled = true;
+    const t0 = Date.now();
+
+    try {
+      const res  = await fetch(`${API}/case`, {
+        method:  'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || `Error ${res.status}`);
+      if (typeof data.remaining_requests === 'number' && authUser) {
+        updateQuotaBadge(data.remaining_requests, authUser.request_limit);
+      }
+      renderResults(data, ((Date.now() - t0) / 1000).toFixed(1));
+    } catch (err) {
+      errorEl.textContent = err.message || 'Request failed. Is the API running?';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+  }
+
+  // ── Render results ────────────────────────────────────
+  function renderResults(data, elapsed) {
+    currentCaseId = data.case_id;
+    chatHistory.length = 0;
+    document.getElementById('chatContextBadge').textContent = data.case_id.slice(0, 8) + '…';
+    document.getElementById('chatFab').classList.add('visible');
+    document.getElementById('emptyState').style.display = 'none';
+    const content = document.getElementById('resultsContent');
+    content.classList.add('visible');
+
+    document.getElementById('caseMeta').innerHTML = `
+      <div class="meta-item">
+        <span class="meta-label">Case ID</span>
+        <span class="meta-value">${data.case_id.slice(0, 8)}&hellip;</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Pipeline time</span>
+        <span class="meta-value">${elapsed}s</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Final diagnoses</span>
+        <span class="meta-value">${data.final_diagnosis.length}</span>
+      </div>
+    `;
+
+    renderStage('initial',    data.initial_diagnosis);
+    renderStage('reflection', data.reflection_diagnosis);
+    renderStage('final',      data.final_diagnosis);
+
+    document.querySelector('#disclaimer span').textContent = data.disclaimer;
+    switchTab('final');
+  }
+
+  function renderStage(stage, diagnoses) {
+    const container = document.getElementById(`tab-${stage}`);
+    document.getElementById(`count-${stage}`).textContent = diagnoses.length;
+    container.innerHTML = '';
+
+    if (!diagnoses.length) {
+      container.innerHTML = '<p style="color:var(--text-dim);font-size:0.85rem;">No diagnoses returned for this stage.</p>';
+      return;
+    }
+
+    const rankLabels = ['Primary', 'Secondary', 'Tertiary', 'Additional'];
+
+    diagnoses.forEach((d, idx) => {
+      const card = document.createElement('div');
+      card.className = `diagnosis-card ${d.confidence}`;
+      card.setAttribute('data-rank', idx + 1);
+
+      const chips = (d.evidence_ids || []).map(id =>
+        `<button class="evidence-chip" onclick="showCitation('${id}', this)" title="View source document" aria-label="View citation ${id.slice(0,8)}">
+          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true"><rect x="1" y="1" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.1"/><path d="M3 3h3M3 5h2" stroke="currentColor" stroke-width="0.9" stroke-linecap="round"/></svg>
+          ${id.slice(0, 8)}
+        </button>`
+      ).join('');
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div>
+            <div class="card-rank">${rankLabels[idx] || `#${idx + 1}`}</div>
+            <div class="condition-name">${d.condition}</div>
+          </div>
+          <span class="confidence-badge ${d.confidence}">${d.confidence}</span>
+        </div>
+        ${d.reasoning ? `<p class="reasoning-text">${d.reasoning}</p>` : ''}
+        ${chips ? `
+          <div class="evidence-section">
+            <span class="evidence-label">Evidence</span>
+            <div class="evidence-chips">${chips}</div>
+          </div>` : ''}
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // ── Citations ─────────────────────────────────────────
+  const citationCache = {};
+
+  async function showCitation(docId, chipEl) {
+    chipEl.classList.add('loading');
+    try {
+      if (!citationCache[docId]) {
+        const r = await fetch(`${API}/documents/${docId}`, { credentials: 'include' });
+        if (!r.ok) throw new Error();
+        citationCache[docId] = await r.json();
+      }
+      renderCitation(citationCache[docId], chipEl);
+    } catch {
+      // silent
+    } finally {
+      chipEl.classList.remove('loading');
+    }
+  }
+
+  function renderCitation(doc, chipEl) {
+    const meta = document.getElementById('citationMeta');
+    meta.innerHTML = [doc.disease_category, doc.evidence_type]
+      .filter(Boolean)
+      .map(t => `<span class="citation-tag">${t}</span>`)
+      .join('');
+
+    document.getElementById('citationSource').textContent = doc.source || 'Unknown source';
+    document.getElementById('citationContent').textContent = doc.content;
+    document.getElementById('citationId').textContent = `ID: ${doc.id}`;
+
+    const popover = document.getElementById('citationPopover');
+    popover.style.display = 'flex';
+    popover.style.flexDirection = 'column';
+    document.getElementById('citationOverlay').style.display = 'block';
+
+    const rect = chipEl.getBoundingClientRect();
+    const pw = 380, ph = 300;
+    let top  = rect.bottom + 8;
+    let left = rect.left;
+
+    if (top + ph > window.innerHeight - 16) top = rect.top - ph - 8;
+    if (left + pw > window.innerWidth - 16) left = window.innerWidth - pw - 16;
+    if (left < 8) left = 8;
+
+    popover.style.top  = `${top}px`;
+    popover.style.left = `${left}px`;
+  }
+
+  function closeCitation() {
+    document.getElementById('citationPopover').style.display = 'none';
+    document.getElementById('citationOverlay').style.display = 'none';
+  }
+
+  // ── Chat ──────────────────────────────────────────────
+  let chatOpen = false;
+
+  function toggleChat() {
+    chatOpen = !chatOpen;
+    document.getElementById('chatPanel').classList.toggle('open', chatOpen);
+    document.getElementById('chatFab').setAttribute('aria-expanded', chatOpen);
+    if (chatOpen) document.getElementById('chatInput').focus();
+  }
+
+  function chatKeydown(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendChat();
+    }
+  }
+
+  function appendMessage(role, content) {
+    const container = document.getElementById('chatMessages');
+    document.getElementById('chatEmpty').style.display = 'none';
+
+    const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const msg = document.createElement('div');
+    msg.className = `chat-msg ${role}`;
+    msg.innerHTML = `
+      <div class="chat-bubble">${content.replace(/\n/g, '<br>')}</div>
+      <span class="chat-msg-time">${now}</span>
+    `;
+    const typing = document.getElementById('chatTyping');
+    container.insertBefore(msg, typing);
+    container.scrollTop = container.scrollHeight;
+    return msg;
+  }
+
+  async function sendChat() {
+    if (!currentCaseId) return;
+    const input = document.getElementById('chatInput');
+    const text  = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('chatSend').disabled = true;
+
+    chatHistory.push({ role: 'user', content: text });
+    appendMessage('user', text);
+
+    const typing = document.getElementById('chatTyping');
+    typing.classList.add('visible');
+    document.getElementById('chatMessages').scrollTop = 99999;
+
+    try {
+      const r = await fetch(`${API}/chat/${currentCaseId}`, {
+        method:  'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ messages: chatHistory }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.detail || 'Chat error');
+      if (typeof data.remaining_requests === 'number' && authUser) {
+        updateQuotaBadge(data.remaining_requests, authUser.request_limit);
+      }
+
+      chatHistory.push({ role: 'assistant', content: data.reply });
+      typing.classList.remove('visible');
+      appendMessage('assistant', data.reply);
+    } catch (err) {
+      typing.classList.remove('visible');
+      appendMessage('assistant', `Error: ${err.message}`);
+    } finally {
+      document.getElementById('chatSend').disabled = false;
+      input.focus();
+    }
+  }
+
+  document.getElementById('chatInput').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  });
+
+  function switchTab(name) {
+    const stages = ['initial', 'reflection', 'final'];
+    stages.forEach(s => {
+      const btn   = document.getElementById(`tab-btn-${s}`);
+      const panel = document.getElementById(`tab-${s}`);
+      const active = s === name;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', active);
+      panel.classList.toggle('active', active);
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedicalRAG — Sign Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#F8F5F0; --surface:#FFFFFF; --surface-2:#F1EDE6; --border:#DDD8CF; --text-dim:#A09890;
+      --text-mid:#3D3530; --text-bright:#1A1410; --accent:#B91C1C; --radius:3px;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text-mid);
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(248,245,240,0.96);
+      backdrop-filter: blur(10px);
+    }
+    .header-left { display: flex; align-items: center; gap: 1rem; }
+    .app-name {
+      font-family: 'Spectral', Georgia, serif;
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+    .app-name span { color: var(--accent); }
+    .env-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .title {
+      font-family: 'Spectral', serif;
+      font-size: 1.25rem;
+      color: var(--text-bright);
+      letter-spacing: -0.02em;
+    }
+    .sub {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      margin-bottom: 0.25rem;
+    }
+    input[type="email"], input[type="password"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-bright);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.92rem;
+      padding: 11px 12px;
+      min-height: 44px;
+      outline: none;
+    }
+    input:focus {
+      border-color: var(--text-mid);
+      box-shadow: 0 0 0 3px rgba(26,20,16,0.06);
+    }
+    .submit-btn {
+      background: var(--text-bright);
+      border: none;
+      border-radius: var(--radius);
+      color: var(--bg);
+      cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-height: 46px;
+      transition: background 0.15s;
+    }
+    .submit-btn:hover { background: var(--accent); }
+    .error {
+      color: var(--accent);
+      font-size: 0.82rem;
+      min-height: 1rem;
+    }
+    .success {
+      color: #166534;
+      font-size: 0.82rem;
+      min-height: 1rem;
+    }
+    .link-row {
+      font-size: 0.84rem;
+      color: var(--text-mid);
+    }
+    .link-row a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <span class="app-name">Medical<span>RAG</span></span>
+    <span class="env-badge" id="envBadge">Dev</span>
+  </div>
+</header>
+<main>
+  <section class="auth-card" aria-label="Sign up form">
+    <h1 class="title">Create account</h1>
+    <p class="sub">Each new user starts with 5 LLM requests by default.</p>
+    <input id="email" type="email" placeholder="Email" autocomplete="email" required>
+    <input id="password" type="password" placeholder="Password (min 8 chars)" autocomplete="new-password" required>
+    <button class="submit-btn" id="signupBtn" type="button" onclick="signup()">Sign up</button>
+    <div class="error" id="error"></div>
+    <div class="success" id="success"></div>
+    <p class="link-row">Already have an account? <a href="/login">Sign in</a></p>
+  </section>
+</main>
+<script>
+  const API = window.location.origin;
+
+  async function parseResponse(response) {
+    const raw = await response.text();
+    if (!raw) return {};
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return { detail: raw };
+    }
+  }
+
+  async function checkHealth() {
+    try {
+      const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(3000) });
+      if (!r.ok) throw new Error();
+      const data = await r.json();
+      document.getElementById('envBadge').textContent = data.env || 'dev';
+    } catch {
+      document.getElementById('envBadge').textContent = 'offline';
+    }
+  }
+
+  async function signup() {
+    const errorEl = document.getElementById('error');
+    const successEl = document.getElementById('success');
+    errorEl.textContent = '';
+    successEl.textContent = '';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      errorEl.textContent = 'Email and password are required.';
+      return;
+    }
+
+    const btn = document.getElementById('signupBtn');
+    btn.disabled = true;
+
+    try {
+      const r = await fetch(`${API}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await parseResponse(r);
+      if (!r.ok) throw new Error(data.detail || 'Signup failed');
+
+      successEl.textContent = `Signup complete. You have ${data.user.remaining_requests}/${data.user.request_limit} requests.`;
+      setTimeout(() => { window.location.href = '/login'; }, 700);
+    } catch (err) {
+      const msg = err.message || 'Signup failed';
+      if (msg.includes('Database unavailable')) {
+        errorEl.textContent = 'Database offline. Start Postgres with: docker compose up -d postgres';
+      } else {
+        errorEl.textContent = msg;
+      }
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  checkHealth();
+</script>
+</body>
+</html>
