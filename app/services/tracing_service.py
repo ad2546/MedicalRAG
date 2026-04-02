@@ -1,21 +1,18 @@
-"""Okuha Cloud tracing via OpenTelemetry.
+"""Okahu Cloud tracing via monocle-apptrace + OpenTelemetry.
 
-Okuha auto-instruments OpenAI calls through OTel. This module:
-  1. Calls setup_okahu_telemetry() at import time so the OTel TracerProvider
-     is registered before any OpenAI client is created.
-  2. Exposes span() and trace_event() helpers that emit real OTel spans,
-     which Okuha picks up and sends to the cloud dashboard.
-  3. Degrades silently to local logging when OKUHA_API_KEY is absent.
+Setup:
+  1. Set OKAHU_API_KEY=<your key> in .env  (get from Okahu portal or welcome email)
+  2. Set MONOCLE_EXPORTER=okahu in .env
+  3. Set OKAHU_SERVICE_NAME=medicalChatbot (must match app name in portal)
 
-Captured per-pipeline:
-  - All agent inputs/outputs
-  - Token usage per LLM call (via auto-instrumentation)
-  - Evidence selection per retrieval round
-  - Reflection reasoning
-  - Final structured output
+Monocle reads OKAHU_API_KEY and MONOCLE_EXPORTER directly from the environment.
+Every pipeline run will appear as a workflow trace in portal.okahu.co.
+
+Degrades silently to local OTel (no-op exporter) when OKAHU_API_KEY is absent.
 """
 
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any
@@ -33,38 +30,41 @@ def _init_tracer() -> None:
     if _tracer_initialized:
         return
 
-    if not settings.okuha_api_key:
-        logger.warning("OKUHA_API_KEY not set — Okuha tracing disabled, falling back to local logs")
-        _tracer_initialized = True  # mark done so we don't retry every call
+    if not settings.okahu_api_key:
+        logger.warning(
+            "OKAHU_API_KEY not set — Okahu Cloud tracing disabled. "
+            "Add OKAHU_API_KEY=<key> and MONOCLE_EXPORTER=okahu to .env to enable."
+        )
+        _tracer_initialized = True
         return
 
     try:
-        import os
+        # Ensure env vars are set before monocle initialises its exporter
+        os.environ.setdefault("OKAHU_API_KEY", settings.okahu_api_key)
+        os.environ.setdefault("MONOCLE_EXPORTER", "okahu")
 
         from monocle_apptrace.instrumentation.common import setup_monocle_telemetry
 
-        # Monocle reads MONOCLE_API_KEY from the environment
-        os.environ.setdefault("MONOCLE_API_KEY", settings.okuha_api_key)
-        setup_monocle_telemetry(
-            workflow_name=settings.okuha_service_name,
+        setup_monocle_telemetry(workflow_name=settings.okahu_service_name)
+        logger.info(
+            "Okahu Cloud tracing initialised — workflow=%s", settings.okahu_service_name
         )
-        logger.info("Monocle/Okahu tracing initialised (service=%s)", settings.okuha_service_name)
     except Exception as exc:
-        logger.warning("Okuha SDK init failed: %s — falling back to local logs", exc)
+        logger.warning("Okahu SDK init failed: %s — falling back to local OTel", exc)
 
-    # Obtain the OTel tracer regardless (no-ops if Okuha didn't register a real provider)
+    # Obtain OTel tracer (no-ops if monocle didn't register a real provider)
     from opentelemetry import trace
 
     _otel_tracer = trace.get_tracer("medicalrag")
     _tracer_initialized = True
 
 
-# Initialise eagerly so the OTel provider is in place before any AsyncOpenAI client is created.
+# Initialise eagerly — OTel provider must be in place before any LLM client is created.
 _init_tracer()
 
 
 class TracingService:
-    """Facade that wraps OpenTelemetry spans and forwards them to Okuha Cloud."""
+    """Facade that wraps OpenTelemetry spans and forwards them to Okahu Cloud."""
 
     def new_trace_id(self) -> str:
         return str(uuid.uuid4())
@@ -85,7 +85,6 @@ class TracingService:
         with _otel_tracer.start_as_current_span(event_name) as span:
             span.set_attribute("trace_id", trace_id)
             span.set_attribute("event", event_name)
-            # Flatten dicts to scalar OTel attributes
             for k, v in inputs.items():
                 span.set_attribute(f"input.{k}", str(v))
             for k, v in outputs.items():

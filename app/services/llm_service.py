@@ -15,7 +15,19 @@ import json
 import logging
 import os
 import re
+import time
 from functools import partial
+
+from json_repair import repair_json
+from opentelemetry import trace as otel_trace
+
+try:
+    from monocle_apptrace.instrumentation.common.constants import MONOCLE_SDK_VERSION
+    from monocle_apptrace.instrumentation.common.utils import get_monocle_version
+    _MONOCLE_VERSION = get_monocle_version()
+except Exception:
+    MONOCLE_SDK_VERSION = "monocle_apptrace.version"
+    _MONOCLE_VERSION = "unknown"
 
 import oci
 import oci.auth.signers
@@ -25,8 +37,10 @@ import oci.generative_ai_inference.models as gen_models
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from app.config import settings
+from app.services.cache_service import cache_service
 
 logger = logging.getLogger(__name__)
+_otel_tracer = otel_trace.get_tracer("medicalrag.llm")
 
 
 def _build_client() -> oci.generative_ai_inference.GenerativeAiInferenceClient:
@@ -90,36 +104,70 @@ class LLMService:
         temperature: float,
         max_tokens: int,
     ) -> dict:
-        response = self._get_client().chat(
-            gen_models.ChatDetails(
-                compartment_id=settings.oci_compartment_id,
-                serving_mode=gen_models.OnDemandServingMode(model_id=model_id),
-                chat_request=gen_models.GenericChatRequest(
-                    api_format=gen_models.BaseChatRequest.API_FORMAT_GENERIC,
-                    messages=_to_oci_messages(messages),
-                    max_tokens=max_tokens,
-                    temperature=temperature,
-                    is_stream=False,
-                ),
-            )
-        )
-        chat_resp = response.data.chat_response
-        text = chat_resp.choices[0].message.content[0].text
-        usage = getattr(chat_resp, "usage", None)
+        # ── LLM prompt cache ──────────────────────────────────────────────
+        cache_key = cache_service.llm_key(model_id, messages)
+        cached = cache_service.get_llm(cache_key)
+        if cached is not None:
+            return cached
 
-        logger.debug(
-            "OCI GenAI tokens — prompt: %d, completion: %d",
-            getattr(usage, "prompt_tokens", 0) if usage else 0,
-            getattr(usage, "completion_tokens", 0) if usage else 0,
-        )
-        return {
+        # ── OTel span (visible in Okahu Cloud as an LLM call) ─────────────
+        with _otel_tracer.start_as_current_span("oci.generativeai.chat") as span:
+            span.set_attribute("gen_ai.system", "oci_generativeai")
+            span.set_attribute("gen_ai.request.model", model_id)
+            span.set_attribute("gen_ai.request.max_tokens", max_tokens)
+            span.set_attribute("gen_ai.request.temperature", temperature)
+            span.set_attribute("llm.request.type", "chat")
+            # Required by monocle exporter to pass skip_export filter
+            span.set_attribute(MONOCLE_SDK_VERSION, _MONOCLE_VERSION)
+            # Required by Okahu Cloud to associate trace with the correct app
+            span.set_attribute("workflow.name", settings.okahu_service_name)
+            span.set_attribute("entity.1.name", settings.okahu_service_name)
+            span.set_attribute("entity.1.type", "workflow.generic")
+
+            t0 = time.perf_counter()
+            response = self._get_client().chat(
+                gen_models.ChatDetails(
+                    compartment_id=settings.oci_compartment_id,
+                    serving_mode=gen_models.OnDemandServingMode(model_id=model_id),
+                    chat_request=gen_models.GenericChatRequest(
+                        api_format=gen_models.BaseChatRequest.API_FORMAT_GENERIC,
+                        messages=_to_oci_messages(messages),
+                        max_tokens=max_tokens,
+                        temperature=temperature,
+                        is_stream=False,
+                    ),
+                )
+            )
+            latency_ms = int((time.perf_counter() - t0) * 1000)
+
+            chat_resp = response.data.chat_response
+            text = chat_resp.choices[0].message.content[0].text
+            usage = getattr(chat_resp, "usage", None)
+
+            prompt_tokens = getattr(usage, "prompt_tokens", 0) if usage else 0
+            completion_tokens = getattr(usage, "completion_tokens", 0) if usage else 0
+            total_tokens = getattr(usage, "total_tokens", 0) if usage else 0
+
+            span.set_attribute("gen_ai.usage.prompt_tokens", prompt_tokens)
+            span.set_attribute("gen_ai.usage.completion_tokens", completion_tokens)
+            span.set_attribute("gen_ai.usage.total_tokens", total_tokens)
+            span.set_attribute("llm.latency_ms", latency_ms)
+
+            logger.debug(
+                "OCI GenAI — model=%s prompt=%d completion=%d latency=%dms",
+                model_id, prompt_tokens, completion_tokens, latency_ms,
+            )
+
+        result = {
             "text": text,
             "usage": {
-                "prompt_tokens":     getattr(usage, "prompt_tokens",     0) if usage else 0,
-                "completion_tokens": getattr(usage, "completion_tokens", 0) if usage else 0,
-                "total_tokens":      getattr(usage, "total_tokens",      0) if usage else 0,
+                "prompt_tokens": prompt_tokens,
+                "completion_tokens": completion_tokens,
+                "total_tokens": total_tokens,
             },
         }
+        cache_service.set_llm(cache_key, result)
+        return result
 
     async def _achat(
         self,
@@ -135,13 +183,26 @@ class LLMService:
 
     @staticmethod
     def _extract_json(text: str) -> dict:
+        # Strip markdown fences
         cleaned = re.sub(r"^```(?:json)?\s*", "", text.strip())
-        cleaned = re.sub(r"\s*```$", "", cleaned)
+        cleaned = re.sub(r"\s*```$", "", cleaned.strip())
+        # Extract outermost JSON object
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start != -1 and end != -1:
+            cleaned = cleaned[start : end + 1]
         try:
             return json.loads(cleaned)
         except json.JSONDecodeError:
-            logger.error("JSON parse failed. Raw model output:\n%s", cleaned)
-            raise
+            logger.warning("Standard JSON parse failed, attempting repair...")
+            try:
+                repaired = repair_json(cleaned, return_objects=True)
+                if isinstance(repaired, dict):
+                    return repaired
+                return json.loads(repair_json(cleaned))
+            except Exception:
+                logger.error("JSON repair failed. Raw model output:\n%s", cleaned)
+                raise
 
     async def chat(
         self,
@@ -155,13 +216,18 @@ class LLMService:
             {"role": "user", "content": user_prompt},
         ]
         if response_format == "json_object":
-            messages[0]["content"] += "\n\nIMPORTANT: Respond with valid JSON only. No markdown, no prose."
+            messages[0]["content"] += (
+                "\n\nIMPORTANT: Respond with valid JSON only. "
+                "No markdown fences, no prose, no comments. "
+                "All string values must be single-line — no literal newlines inside strings. "
+                "Use \\n if you need a line break inside a value."
+            )
 
         result = await self._achat(
             model_id=settings.oci_model_gen,
             messages=messages,
             temperature=0.1,
-            max_tokens=4096,
+            max_tokens=8192,
         )
         content = self._extract_json(result["text"]) if response_format == "json_object" else result["text"]
         return {"content": content, "usage": result["usage"]}

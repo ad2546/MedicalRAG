@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.database import init_db, is_database_available
-from app.routers import auth, cases, chat, diagnosis, documents
+from app.routers import auth, cases, chat, diagnosis, documents, workflow
 # Import tracing early — registers OTel provider before any OpenAI client is created
 from app.services import tracing_service  # noqa: F401
 
@@ -48,6 +48,7 @@ app.include_router(diagnosis.router)
 app.include_router(documents.router)
 app.include_router(chat.router)
 app.include_router(auth.router)
+app.include_router(workflow.router)
 
 
 @app.get("/health")

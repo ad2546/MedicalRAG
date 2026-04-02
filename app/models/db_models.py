@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import ARRAY, TIMESTAMP, UUID, Float, Integer, String, Text
+from sqlalchemy import ARRAY, Boolean, TIMESTAMP, UUID, Float, Integer, String, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -53,6 +53,25 @@ class DiagnosisOutput(Base):
     diagnosis: Mapped[dict] = mapped_column(JSONB, nullable=False)
     reasoning: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.utcnow)
+
+
+class PipelineAudit(Base):
+    """Full audit log for every pipeline execution."""
+
+    __tablename__ = "pipeline_audit"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    case_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), nullable=True)
+    trace_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
+    completed_at: Mapped[datetime | None] = mapped_column(TIMESTAMP, nullable=True)
+    stage_timings: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    token_usage: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    cache_hit: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # "api" | "stream" | "workflow"
+    source: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
 
 class User(Base):

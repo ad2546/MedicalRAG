@@ -18,4 +18,4 @@ USER appuser
 # PORT env var respected by OCI's container runtime
 ENV PORT=8000
 
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

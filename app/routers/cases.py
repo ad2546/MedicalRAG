@@ -3,6 +3,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from tenacity import RetryError
 
@@ -42,3 +43,32 @@ async def submit_case(
         raise HTTPException(status_code=500, detail=f"Pipeline error: {exc}") from exc
 
     return result.model_copy(update={"remaining_requests": quota.remaining_requests})
+
+
+@router.post("/stream", status_code=200)
+async def submit_case_stream(
+    payload: CaseRequest,
+    quota: UserQuota = Depends(consume_user_request_quota),
+    db: AsyncSession = Depends(get_db),
+):
+    """Submit a case and receive SSE events as each pipeline stage completes."""
+    case_id = payload.case_id or uuid.uuid4()
+
+    case_record = Case(
+        id=case_id,
+        symptoms={"items": payload.symptoms},
+        vitals=payload.vitals.model_dump(exclude_none=True),
+        history=payload.history.model_dump(exclude_none=True),
+        labs=payload.labs,
+    )
+    db.add(case_record)
+    await db.commit()
+
+    return StreamingResponse(
+        pipeline.run_streaming(db=db, case=payload, case_id=case_id),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        },
+    )

@@ -21,9 +21,9 @@ class Settings(BaseSettings):
     oci_config_profile: str = "DEFAULT"
     oci_use_instance_principal: bool = False
 
-    # Okuha Cloud
-    okuha_api_key: str = ""
-    okuha_service_name: str = "medical-rag"
+    # Okahu Cloud (monocle-apptrace)
+    okahu_api_key: str = ""          # maps to OKAHU_API_KEY env var
+    okahu_service_name: str = "medicalchatbot_ni9wbg"  # must match app ID in portal
 
     # Embedding
     embedding_model: str = "all-MiniLM-L6-v2"
@@ -33,11 +33,14 @@ class Settings(BaseSettings):
     # Retrieval
     top_k_docs: int = 5
     reflection_confidence_threshold: float = 0.5
-    max_reflection_rounds: int = 2
+    max_reflection_rounds: int = 1
 
     # App
     app_env: str = "development"
     log_level: str = "INFO"
+
+    # Workflow endpoint (external Bearer token auth for Okahu Cloud / n8n)
+    workflow_api_key: str = ""
 
     # Auth
     auth_secret_key: str = "change-me-in-production"
