@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import settings
 from app.database import get_db
 from app.models.db_models import User
+from app.services.cache_service import get_global_rate_limiter
 
 
 def _b64url_encode(raw: bytes) -> str:
@@ -124,6 +125,13 @@ async def consume_user_request_quota(
 ) -> UserQuota:
     if settings.app_env == "development":
         return UserQuota(user_id=user.id, email=user.email, remaining_requests=9999)
+
+    # ── Global daily cap (in-process, resets at UTC midnight) ─────────────
+    if not get_global_rate_limiter().check_and_increment():
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Daily service limit reached. Please try again tomorrow.",
+        )
 
     quota_update = (
         update(User)

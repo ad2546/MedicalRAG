@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.3"
 
 # Production compose — no source-code volume mount, restart always
 # Usage: docker compose -f docker-compose.prod.yml up -d
@@ -30,8 +30,7 @@ services:
     container_name: medicalrag_api
     restart: unless-stopped
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     env_file: .env
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-medicalrag}
@@ -47,7 +46,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
 
 volumes:
   pgdata:

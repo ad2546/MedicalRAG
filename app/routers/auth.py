@@ -23,8 +23,23 @@ def _validate_email(email: str) -> str:
 
 
 def _validate_password(password: str) -> None:
+    """Enforce HIPAA-aligned password complexity."""
+    errors = []
     if len(password) < 8:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password must be at least 8 characters")
+        errors.append("at least 8 characters")
+    if not re.search(r"[A-Z]", password):
+        errors.append("one uppercase letter")
+    if not re.search(r"[a-z]", password):
+        errors.append("one lowercase letter")
+    if not re.search(r"\d", password):
+        errors.append("one number")
+    if not re.search(r"[!@#$%^&*()\-_=+\[\]{}|;:',.<>/?]", password):
+        errors.append("one special character")
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Password must contain: {', '.join(errors)}",
+        )
 
 
 def _user_info(user: User) -> UserInfoResponse:

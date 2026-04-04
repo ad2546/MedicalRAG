@@ -442,10 +442,107 @@
       display: flex;
       flex-direction: column;
       background: var(--bg);
+      padding-bottom: 5rem;
     }
     .results-panel::-webkit-scrollbar { width: 3px; }
     .results-panel::-webkit-scrollbar-track { background: transparent; }
     .results-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── SESSION HISTORY ── */
+    .session-history {
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.25rem 0.75rem;
+    }
+    .session-history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+    .session-history-title {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.58rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+    }
+    .session-history-clear {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 2px;
+      transition: color 0.15s;
+    }
+    .session-history-clear:hover { color: var(--accent); }
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+    .session-list::-webkit-scrollbar { width: 2px; }
+    .session-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .session-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.5rem 0.6rem;
+      border-radius: 3px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .session-item:hover {
+      background: var(--surface);
+      border-color: var(--border);
+    }
+    .session-item.active {
+      background: var(--surface);
+      border-color: var(--accent);
+    }
+    .session-item-info { flex: 1; min-width: 0; }
+    .session-item-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      color: var(--text-bright);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .session-item-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .session-item-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-dim);
+      padding: 2px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.12s, color 0.12s;
+    }
+    .session-item:hover .session-item-delete { opacity: 1; }
+    .session-item-delete:hover { color: var(--accent); }
+    .session-empty-msg {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 0.5rem 0;
+    }
 
     /* ── EMPTY STATE ── */
     .empty-state {
@@ -594,21 +691,28 @@
     .diagnosis-card:nth-child(3) { animation-delay: 0.14s; }
     .diagnosis-card:nth-child(4) { animation-delay: 0.19s; }
 
-    /* Large watermark rank number */
+    /* Large watermark rank number — kept behind text, never overlapping */
     .diagnosis-card::before {
       content: attr(data-rank);
       position: absolute;
-      right: 1.25rem;
-      top: 50%;
-      transform: translateY(-50%);
+      right: 1rem;
+      bottom: 0.5rem;
       font-family: 'Spectral', serif;
-      font-size: 5.5rem;
+      font-size: 4rem;
       font-weight: 700;
       color: var(--border);
+      opacity: 0.55;
       line-height: 1;
       pointer-events: none;
       user-select: none;
+      z-index: 0;
     }
+
+    /* Ensure card content always sits above the watermark */
+    .diagnosis-card > * { position: relative; z-index: 1; }
+
+    /* Right padding so text never flows into the watermark zone */
+    .diagnosis-card { padding-right: 4.5rem; }
 
     .diagnosis-card.high   { border-left-color: var(--high); }
     .diagnosis-card.medium { border-left-color: var(--medium); }
@@ -780,23 +884,28 @@
     /* ── CHAT FAB ── */
     .chat-fab {
       position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      background: var(--text-bright);
+      bottom: 2rem;
+      right: 2rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 24px;
+      background: #ffffff;
       border: none;
       cursor: pointer;
       display: none;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 16px rgba(26,20,16,0.22);
+      box-shadow: 0 2px 12px rgba(255, 255, 255, 0.18), 0 1px 4px rgba(255, 255, 255, 0.1);
       z-index: 150;
-      transition: background 0.15s, transform 0.15s;
+      transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
     }
-    .chat-fab:hover { background: var(--accent); transform: scale(1.05); }
-    .chat-fab:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 3px; }
+    .chat-fab:hover {
+      background: var(--accent);
+      box-shadow: 0 4px 20px rgba(185,28,28,0.25), 0 2px 6px rgba(185,28,28,0.12);
+      transform: translateY(-1px);
+    }
+    .chat-fab:active { transform: translateY(0); }
+    .chat-fab:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
     .chat-fab.visible { display: flex; }
 
     /* ── CHAT PANEL ── */
@@ -1130,6 +1239,15 @@
   <!-- ── RESULTS PANEL ── -->
   <section class="results-panel" aria-label="Diagnosis Results" aria-live="polite">
 
+    <!-- Session History -->
+    <div class="session-history" id="sessionHistory">
+      <div class="session-history-header">
+        <span class="session-history-title">Session History</span>
+        <button class="session-history-clear" onclick="clearAllSessions()" title="Clear all saved sessions">Clear all</button>
+      </div>
+      <div class="session-list" id="sessionList"></div>
+    </div>
+
     <div class="empty-state" id="emptyState">
       <svg class="empty-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true">
         <rect x="8" y="6" width="32" height="36" rx="3" stroke="currentColor" stroke-width="1.5"/>
@@ -1245,6 +1363,92 @@
   let authUser = null;
   const chatHistory = [];
 
+  // ── Session persistence (localStorage) ───────────────
+  const SESSION_KEY = 'medrag_sessions';
+  const MAX_SESSIONS = 20;
+
+  function loadSessions() {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function saveSessions(sessions) {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sessions));
+  }
+
+  function saveSession(data, elapsed) {
+    const sessions = loadSessions();
+    const topDx = data.final_diagnosis[0]?.condition || 'Unknown';
+    const entry = {
+      id: data.case_id,
+      label: topDx,
+      finalCount: data.final_diagnosis.length,
+      elapsed,
+      ts: Date.now(),
+      data,
+    };
+    // Remove duplicate if re-running same case
+    const filtered = sessions.filter(s => s.id !== data.case_id);
+    filtered.unshift(entry);
+    saveSessions(filtered.slice(0, MAX_SESSIONS));
+    renderSessionList();
+  }
+
+  function deleteSession(id, e) {
+    e.stopPropagation();
+    const sessions = loadSessions().filter(s => s.id !== id);
+    saveSessions(sessions);
+    if (currentCaseId === id) {
+      currentCaseId = null;
+      document.getElementById('resultsContent').classList.remove('visible');
+      document.getElementById('emptyState').style.display = '';
+      document.getElementById('chatFab').classList.remove('visible');
+    }
+    renderSessionList();
+  }
+
+  function clearAllSessions() {
+    saveSessions([]);
+    renderSessionList();
+  }
+
+  function restoreSession(entry) {
+    renderResults(entry.data, entry.elapsed);
+    // Mark active
+    document.querySelectorAll('.session-item').forEach(el =>
+      el.classList.toggle('active', el.dataset.id === entry.id)
+    );
+  }
+
+  function renderSessionList() {
+    const list = document.getElementById('sessionList');
+    const sessions = loadSessions();
+    if (!sessions.length) {
+      list.innerHTML = '<div class="session-empty-msg">No saved sessions</div>';
+      return;
+    }
+    list.innerHTML = sessions.map(s => {
+      const date = new Date(s.ts);
+      const timeStr = date.toLocaleDateString([], { month: 'short', day: 'numeric' }) +
+        ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const isActive = s.id === currentCaseId;
+      return `<div class="session-item${isActive ? ' active' : ''}" data-id="${s.id}"
+          onclick="restoreSession(${JSON.stringify(s).replace(/"/g, '&quot;')})"
+          title="Restore: ${s.label}">
+        <div class="session-item-info">
+          <div class="session-item-label">${s.label}</div>
+          <div class="session-item-meta">${s.finalCount} dx · ${s.elapsed}s · ${timeStr}</div>
+        </div>
+        <button class="session-item-delete" onclick="deleteSession('${s.id}', event)"
+            aria-label="Delete session" title="Delete">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+            <path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>`;
+    }).join('');
+  }
+
   function updateQuotaBadge(remaining, requestLimit) {
     const badge = document.getElementById('quotaBadge');
     badge.textContent = `Requests: ${remaining}/${requestLimit}`;
@@ -1308,6 +1512,7 @@
     if (!ok) return;
     await checkHealth();
     setInterval(checkHealth, 20000);
+    renderSessionList();
   })();
 
   // ── Symptom tags ──────────────────────────────────────
@@ -1571,6 +1776,9 @@
 
     document.querySelector('#disclaimer span').textContent = data.disclaimer;
     switchTab('final');
+
+    // Persist to localStorage and refresh sidebar
+    saveSession(data, elapsed);
   }
 
   function renderStage(stage, diagnoses) {

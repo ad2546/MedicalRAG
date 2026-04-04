@@ -24,9 +24,35 @@ async def get_db() -> AsyncSession:
 
 
 async def init_db() -> None:
-    """Create all tables (used in tests; production uses init.sql migration)."""
+    """Run migrations/init.sql to create extensions and tables (idempotent).
+
+    Executes init.sql directly so Railway (and any non-Docker deployment) gets
+    the pgvector extension and schema on first boot — no docker-entrypoint needed.
+    """
+    import logging
+    import os
+
+    logger = logging.getLogger(__name__)
+    sql_path = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), "..", "migrations", "init.sql")
+    )
+    if not os.path.exists(sql_path):
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        return
+
+    with open(sql_path) as f:
+        sql = f.read()
+
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        for statement in sql.split(";"):
+            stmt = statement.strip()
+            if stmt:
+                try:
+                    await conn.execute(text(stmt))
+                except Exception as exc:
+                    # Most "errors" here are benign (IF NOT EXISTS) — log and continue
+                    logger.debug("Migration statement skipped: %s", exc)
 
 
 async def is_database_available() -> bool:

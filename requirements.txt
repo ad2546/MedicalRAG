@@ -12,8 +12,11 @@ psycopg2-binary==2.9.10
 sentence-transformers>=3.3.1
 torch>=2.5.1  # version resolved by uv based on your Python ABI
 
-# LLM — OCI Generative AI (OpenAI-compatible endpoint)
+# LLM — Groq (default) via OpenAI-compatible SDK
 openai>=1.59.3
+
+# LLM — OCI Generative AI (optional fallback, set LLM_PROVIDER=oci to use)
+# Remove if deploying to Railway/Render/Fly to save ~200 MB of image size
 oci>=2.126.0
 
 # Validation
