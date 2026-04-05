@@ -45,7 +45,13 @@ def _init_tracer() -> None:
 
         from monocle_apptrace.instrumentation.common import setup_monocle_telemetry
 
-        setup_monocle_telemetry(workflow_name=settings.okahu_service_name)
+        # instrumentors=[] disables HTTP framework auto-instrumentation (FastAPI/Starlette)
+        # which causes OTel context detach errors in async handlers.
+        # LLM call tracing (OpenAI/Groq) is handled via wrapper_methods — unaffected.
+        setup_monocle_telemetry(
+            workflow_name=settings.okahu_service_name,
+            instrumentors=[],
+        )
         logger.info(
             "Okahu Cloud tracing initialised — workflow=%s", settings.okahu_service_name
         )
