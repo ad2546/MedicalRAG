@@ -101,12 +101,15 @@ class TracingService:
             yield
             return
 
-        with _otel_tracer.start_as_current_span(name) as otel_span:
-            otel_span.set_attribute("trace_id", trace_id)
-            if attributes:
-                for k, v in attributes.items():
-                    otel_span.set_attribute(k, str(v))
+        otel_span = _otel_tracer.start_span(name)
+        otel_span.set_attribute("trace_id", trace_id)
+        if attributes:
+            for k, v in attributes.items():
+                otel_span.set_attribute(k, str(v))
+        try:
             yield otel_span
+        finally:
+            otel_span.end()
 
 
 tracing_service = TracingService()
