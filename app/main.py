@@ -10,14 +10,16 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
-from app.database import init_db, is_database_available
-from app.routers import auth, cases, chat, diagnosis, documents, workflow
-# Import tracing early — registers OTel provider before any OpenAI client is created
-from app.services import tracing_service  # noqa: F401
-from app.services.cache_service import cache_service, get_global_rate_limiter
 
+# Configure logging FIRST so all subsequent imports emit visible log lines
 logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO))
 logger = logging.getLogger(__name__)
+
+from app.database import init_db, is_database_available
+from app.routers import auth, cases, chat, diagnosis, documents, workflow
+# Import tracing after logging is configured — registers OTel provider before any LLM client
+from app.services import tracing_service  # noqa: F401
+from app.services.cache_service import cache_service, get_global_rate_limiter
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -68,6 +70,12 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.error("Database initialization failed: %s", exc)
     logger.info("Starting MedicalRAG API (env=%s)", settings.app_env)
+    logger.info(
+        "Tracing: okahu_key=%s monocle_exporter=%s service=%s",
+        "set" if settings.okahu_api_key else "MISSING",
+        "set" if __import__("os").environ.get("MONOCLE_EXPORTER") else "MISSING",
+        settings.okahu_service_name,
+    )
     yield
     logger.info("Shutting down MedicalRAG API")
 
