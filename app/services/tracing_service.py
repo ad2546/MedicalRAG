@@ -1,18 +1,15 @@
-"""Okahu Cloud tracing via monocle-apptrace + OpenTelemetry.
+"""Okahu Cloud tracing via direct OTLP HTTP export.
 
-Setup:
-  1. Set OKAHU_API_KEY=<your key> in .env  (get from Okahu portal or welcome email)
-  2. Set MONOCLE_EXPORTER=okahu in .env
-  3. Set OKAHU_SERVICE_NAME=medicalChatbot (must match app name in portal)
+Sends spans directly to Okahu's ingestion endpoint using the OpenTelemetry
+OTLP HTTP exporter — bypassing monocle's sync-only OpenAI instrumentation.
 
-Monocle reads OKAHU_API_KEY and MONOCLE_EXPORTER directly from the environment.
-Every pipeline run will appear as a workflow trace in portal.okahu.co.
+Every LLM call, retrieval step, and pipeline run appears as a workflow trace
+in portal.okahu.co.
 
-Degrades silently to local OTel (no-op exporter) when OKAHU_API_KEY is absent.
+Degrades silently to a no-op when OKAHU_API_KEY is absent.
 """
 
 import logging
-import os
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any
@@ -24,6 +21,9 @@ logger = logging.getLogger(__name__)
 _tracer_initialized = False
 _otel_tracer = None
 
+# Okahu OTLP HTTP ingestion endpoint
+_OKAHU_OTLP_ENDPOINT = "https://ingest.okahu.co/api/v1/monocle/traces"
+
 
 def _init_tracer() -> None:
     global _tracer_initialized, _otel_tracer
@@ -31,46 +31,49 @@ def _init_tracer() -> None:
         return
 
     if not settings.okahu_api_key:
-        logger.warning(
-            "OKAHU_API_KEY not set — Okahu Cloud tracing disabled. "
-            "Add OKAHU_API_KEY=<key> and MONOCLE_EXPORTER=okahu to .env to enable."
-        )
+        logger.warning("OKAHU_API_KEY not set — Okahu Cloud tracing disabled.")
         _tracer_initialized = True
         return
 
     try:
-        # Ensure env vars are set before monocle initialises its exporter
-        os.environ.setdefault("OKAHU_API_KEY", settings.okahu_api_key)
-        os.environ.setdefault("MONOCLE_EXPORTER", "okahu")
+        from opentelemetry import trace
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-        from monocle_apptrace.instrumentation.common import setup_monocle_telemetry
+        resource = Resource.create({
+            "service.name": settings.okahu_service_name,
+            "service.version": "1.0.0",
+        })
 
-        # instrumentors=[] disables HTTP framework auto-instrumentation (FastAPI/Starlette)
-        # which causes OTel context detach errors in async handlers.
-        # LLM call tracing (OpenAI/Groq) is handled via wrapper_methods — unaffected.
-        setup_monocle_telemetry(
-            workflow_name=settings.okahu_service_name,
-            instrumentors=[],
+        exporter = OTLPSpanExporter(
+            endpoint=_OKAHU_OTLP_ENDPOINT,
+            headers={"x-okahu-api-key": settings.okahu_api_key},
         )
+
+        provider = TracerProvider(resource=resource)
+        provider.add_span_processor(BatchSpanProcessor(exporter))
+        trace.set_tracer_provider(provider)
+
+        _otel_tracer = trace.get_tracer("medicalrag")
         logger.info(
-            "Okahu Cloud tracing initialised — workflow=%s", settings.okahu_service_name
+            "Okahu Cloud tracing initialised (OTLP) — workflow=%s endpoint=%s",
+            settings.okahu_service_name,
+            _OKAHU_OTLP_ENDPOINT,
         )
     except Exception as exc:
-        logger.warning("Okahu SDK init failed: %s — falling back to local OTel", exc)
+        logger.warning("Okahu tracing init failed: %s — running without tracing", exc)
 
-    # Obtain OTel tracer (no-ops if monocle didn't register a real provider)
-    from opentelemetry import trace
-
-    _otel_tracer = trace.get_tracer("medicalrag")
     _tracer_initialized = True
 
 
-# Initialise eagerly — OTel provider must be in place before any LLM client is created.
+# Initialise eagerly so the provider is registered before any LLM client is created.
 _init_tracer()
 
 
 class TracingService:
-    """Facade that wraps OpenTelemetry spans and forwards them to Okahu Cloud."""
+    """Wraps OpenTelemetry spans and exports them to Okahu Cloud."""
 
     def new_trace_id(self) -> str:
         return str(uuid.uuid4())
@@ -83,21 +86,22 @@ class TracingService:
         outputs: dict[str, Any],
         metadata: dict[str, Any] | None = None,
     ) -> None:
-        """Emit a named event as an OTel span with attributes."""
+        """Emit a named event as a completed OTel span."""
         if _otel_tracer is None:
-            logger.debug("TRACE [%s] trace=%s inputs=%s outputs=%s", event_name, trace_id, inputs, outputs)
+            logger.debug("TRACE [%s] trace=%s", event_name, trace_id)
             return
 
-        with _otel_tracer.start_as_current_span(event_name) as span:
-            span.set_attribute("trace_id", trace_id)
-            span.set_attribute("event", event_name)
-            for k, v in inputs.items():
-                span.set_attribute(f"input.{k}", str(v))
-            for k, v in outputs.items():
-                span.set_attribute(f"output.{k}", str(v))
-            if metadata:
-                for k, v in metadata.items():
-                    span.set_attribute(f"meta.{k}", str(v))
+        span = _otel_tracer.start_span(event_name)
+        span.set_attribute("trace_id", trace_id)
+        span.set_attribute("event", event_name)
+        for k, v in inputs.items():
+            span.set_attribute(f"input.{k}", str(v))
+        for k, v in outputs.items():
+            span.set_attribute(f"output.{k}", str(v))
+        if metadata:
+            for k, v in metadata.items():
+                span.set_attribute(f"meta.{k}", str(v))
+        span.end()
 
     @asynccontextmanager
     async def span(self, trace_id: str, name: str, attributes: dict | None = None):
