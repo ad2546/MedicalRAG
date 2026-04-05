@@ -325,7 +325,9 @@ class LLMService:
         )
         return {"reply": result["text"], "usage": result["usage"]}
 
-    def build_case_context(self, case: dict, documents: list[dict], max_docs: int = 3, max_doc_chars: int = 1200) -> str:
+    def build_case_context(self, case: dict, documents: list[dict], max_docs: int | None = None, max_doc_chars: int | None = None) -> str:
+        max_docs = max_docs or settings.max_docs_per_prompt
+        max_doc_chars = max_doc_chars or settings.max_doc_chars
         evidence_text = "\n\n".join(
             f"[DOC {i+1} | id={d['id']} | category={d.get('disease_category','?')} | type={d.get('evidence_type','?')}]\n{d['content'][:max_doc_chars]}"
             for i, d in enumerate(documents[:max_docs])

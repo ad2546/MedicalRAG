@@ -41,6 +41,8 @@ class Settings(BaseSettings):
 
     # Retrieval
     top_k_docs: int = 5
+    max_doc_chars: int = 2000   # chars per document sent to LLM (tune for TPM budget)
+    max_docs_per_prompt: int = 3  # docs included per LLM call (tune for TPM budget)
     reflection_confidence_threshold: float = 0.5
     max_reflection_rounds: int = 1
 
