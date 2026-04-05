@@ -1,7 +1,7 @@
-"""Okahu Cloud tracing via direct OTLP HTTP export.
+"""Okahu Cloud tracing via OkahuSpanExporter (monocle-apptrace).
 
-Sends spans directly to Okahu's ingestion endpoint using the OpenTelemetry
-OTLP HTTP exporter — bypassing monocle's sync-only OpenAI instrumentation.
+Uses the monocle OkahuSpanExporter directly — correct endpoint, auth header,
+and span format — bypassing monocle's sync-only OpenAI auto-instrumentation.
 
 Every LLM call, retrieval step, and pipeline run appears as a workflow trace
 in portal.okahu.co.
@@ -21,9 +21,6 @@ logger = logging.getLogger(__name__)
 _tracer_initialized = False
 _otel_tracer = None
 
-# Okahu OTLP HTTP ingestion endpoint
-_OKAHU_OTLP_ENDPOINT = "https://ingest.okahu.co/api/v1/monocle/traces"
-
 
 def _init_tracer() -> None:
     global _tracer_initialized, _otel_tracer
@@ -36,8 +33,11 @@ def _init_tracer() -> None:
         return
 
     try:
+        import os
+        os.environ.setdefault("OKAHU_API_KEY", settings.okahu_api_key)
+
+        from monocle_apptrace.exporters.okahu.okahu_exporter import OkahuSpanExporter
         from opentelemetry import trace
-        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
         from opentelemetry.sdk.resources import Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -47,20 +47,15 @@ def _init_tracer() -> None:
             "service.version": "1.0.0",
         })
 
-        exporter = OTLPSpanExporter(
-            endpoint=_OKAHU_OTLP_ENDPOINT,
-            headers={"x-okahu-api-key": settings.okahu_api_key},
-        )
-
+        exporter = OkahuSpanExporter()
         provider = TracerProvider(resource=resource)
         provider.add_span_processor(BatchSpanProcessor(exporter))
         trace.set_tracer_provider(provider)
 
         _otel_tracer = trace.get_tracer("medicalrag")
         logger.info(
-            "Okahu Cloud tracing initialised (OTLP) — workflow=%s endpoint=%s",
+            "Okahu Cloud tracing initialised — workflow=%s",
             settings.okahu_service_name,
-            _OKAHU_OTLP_ENDPOINT,
         )
     except Exception as exc:
         logger.warning("Okahu tracing init failed: %s — running without tracing", exc)
