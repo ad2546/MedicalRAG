@@ -1,15 +1,17 @@
-"""Okahu Cloud tracing via OkahuSpanExporter (monocle-apptrace).
+"""Okahu Cloud tracing via monocle-apptrace.
 
-Uses the monocle OkahuSpanExporter directly — correct endpoint, auth header,
-and span format — bypassing monocle's sync-only OpenAI auto-instrumentation.
-
-Every LLM call, retrieval step, and pipeline run appears as a workflow trace
-in portal.okahu.co.
+Uses setup_monocle_telemetry with OkahuSpanExporter passed explicitly via
+span_processors — this gives us:
+  1. Correct Okahu endpoint/format/auth (OkahuSpanExporter)
+  2. Proper monocle span attributes (workflow_name, monocle.span.type, etc.)
+     that the Okahu portal needs to display workflow traces
+  3. Auto-instrumentation of AsyncCompletions (Groq calls traced automatically)
 
 Degrades silently to a no-op when OKAHU_API_KEY is absent.
 """
 
 import logging
+import os
 import uuid
 from contextlib import asynccontextmanager
 from typing import Any
@@ -33,26 +35,23 @@ def _init_tracer() -> None:
         return
 
     try:
-        import os
         os.environ.setdefault("OKAHU_API_KEY", settings.okahu_api_key)
 
         from monocle_apptrace.exporters.okahu.okahu_exporter import OkahuSpanExporter
-        from opentelemetry import trace
-        from opentelemetry.sdk.resources import Resource
-        from opentelemetry.sdk.trace import TracerProvider
+        from monocle_apptrace.instrumentation.common import setup_monocle_telemetry
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-        resource = Resource.create({
-            "service.name": settings.okahu_service_name,
-            "service.version": "1.0.0",
-        })
+        # Pass OkahuSpanExporter via span_processors so monocle uses the
+        # correct endpoint/auth while still adding all monocle workflow attributes
+        # and auto-instrumenting AsyncCompletions (Groq calls).
+        setup_monocle_telemetry(
+            workflow_name=settings.okahu_service_name,
+            span_processors=[BatchSpanProcessor(OkahuSpanExporter())],
+        )
 
-        exporter = OkahuSpanExporter()
-        provider = TracerProvider(resource=resource)
-        provider.add_span_processor(BatchSpanProcessor(exporter))
-        trace.set_tracer_provider(provider)
-
+        from opentelemetry import trace
         _otel_tracer = trace.get_tracer("medicalrag")
+
         logger.info(
             "Okahu Cloud tracing initialised — workflow=%s",
             settings.okahu_service_name,
