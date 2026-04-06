@@ -124,44 +124,34 @@ class LLMService:
         if cached is not None:
             return cached
 
-        with _otel_tracer.start_as_current_span("groq.chat") as span:
-            span.set_attribute("gen_ai.system", "groq")
-            span.set_attribute("gen_ai.request.model", model_id)
-            span.set_attribute("gen_ai.request.max_tokens", max_tokens)
-            span.set_attribute("gen_ai.request.temperature", temperature)
-            span.set_attribute("llm.request.type", "chat")
-            span.set_attribute(MONOCLE_SDK_VERSION, _MONOCLE_VERSION)
-            span.set_attribute("workflow.name", settings.okahu_service_name)
-            span.set_attribute("entity.1.name", settings.okahu_service_name)
-            span.set_attribute("entity.1.type", "workflow.generic")
+        t0 = time.perf_counter()
+        kwargs: dict = dict(
+            model=model_id,
+            messages=messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        if response_format == "json_object":
+            kwargs["response_format"] = {"type": "json_object"}
 
-            t0 = time.perf_counter()
-            kwargs: dict = dict(
-                model=model_id,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-            )
-            if response_format == "json_object":
-                kwargs["response_format"] = {"type": "json_object"}
+        # monocle auto-instruments AsyncCompletions.create and creates a proper
+        # inference span (entity.1.type=inference.openai, span.type=inference,
+        # token counts in the "metadata" event).  A manual wrapper span is not
+        # needed here — it would duplicate or shadow monocle's span and cause
+        # Okahu to see the call as workflow.generic instead of GenAI.
+        response = await _get_groq_client().chat.completions.create(**kwargs)
+        latency_ms = int((time.perf_counter() - t0) * 1000)
 
-            response = await _get_groq_client().chat.completions.create(**kwargs)
-            latency_ms = int((time.perf_counter() - t0) * 1000)
+        text = response.choices[0].message.content
+        usage = response.usage
+        prompt_tokens = usage.prompt_tokens if usage else 0
+        completion_tokens = usage.completion_tokens if usage else 0
+        total_tokens = usage.total_tokens if usage else 0
 
-            text = response.choices[0].message.content
-            usage = response.usage
-            prompt_tokens = usage.prompt_tokens if usage else 0
-            completion_tokens = usage.completion_tokens if usage else 0
-            total_tokens = usage.total_tokens if usage else 0
-
-            span.set_attribute("gen_ai.usage.prompt_tokens", prompt_tokens)
-            span.set_attribute("gen_ai.usage.completion_tokens", completion_tokens)
-            span.set_attribute("gen_ai.usage.total_tokens", total_tokens)
-            span.set_attribute("llm.latency_ms", latency_ms)
-            logger.debug(
-                "Groq — model=%s prompt=%d completion=%d latency=%dms",
-                model_id, prompt_tokens, completion_tokens, latency_ms,
-            )
+        logger.debug(
+            "Groq — model=%s prompt=%d completion=%d latency=%dms",
+            model_id, prompt_tokens, completion_tokens, latency_ms,
+        )
 
         result = {
             "text": text,
