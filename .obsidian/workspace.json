@@ -1,0 +1,231 @@
+{
+  "main": {
+    "id": "261f3119c50ffe0b",
+    "type": "split",
+    "children": [
+      {
+        "id": "19d279c1eb6717c7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f4e4d306b15aa99f",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c13c5cdc1e9ca586",
+    "type": "split",
+    "children": [
+      {
+        "id": "00029ee7f9a9c7f9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "aeae1dbbd9d26e8e",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": true
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "4b84aa66a1b4fda1",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "c02e561941261c08",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "16b0eb5a8c6fde05",
+    "type": "split",
+    "children": [
+      {
+        "id": "4652671818160109",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5ea51036be243322",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "67b5baafac39f720",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "0ccb55d586a62e93",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": true,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "0f5b09a81f5c4b11",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "20ed34e0dd4b83b4",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          },
+          {
+            "id": "159ae309a4a6a029",
+            "type": "leaf",
+            "state": {
+              "type": "claudian-view",
+              "state": {},
+              "icon": "bot",
+              "title": "Claudian"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 721.5,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "claudian:Open Claudian": false
+    }
+  },
+  "active": "f4e4d306b15aa99f",
+  "lastOpenFiles": [
+    "obsidian/observability/Okahu Cloud.md",
+    "obsidian/🏠 Home.md",
+    "obsidian/fixes/Task GC Fix.md",
+    "obsidian/fixes/RAGAS Integration.md",
+    "obsidian/fixes/Groq Key Rotation.md",
+    "obsidian/fixes/Faithfulness Prompt Fix.md",
+    "obsidian/fixes/Session Race Condition.md",
+    "obsidian/cases/Case 5 - Multi-System.md",
+    "obsidian/cases/Case 4 - Cache Hit.md",
+    "obsidian/cases/Case 3 - Pediatric Fever.md",
+    "obsidian/cases/Case 2 - B-Symptoms.md",
+    "obsidian/cases/Case 1 - Cardiac.md",
+    "obsidian/metrics/Reflection Delta.md",
+    "obsidian/metrics/Answer Relevancy.md",
+    "obsidian/metrics/Context Precision.md",
+    "obsidian/metrics/Faithfulness.md",
+    "obsidian/observability/Trace Flow.md",
+    "obsidian/observability/Span Types.md",
+    "obsidian/observability/Monocle Apptrace.md",
+    "obsidian/architecture/Database.md",
+    "obsidian/architecture/Services.md",
+    "obsidian/architecture/Agent Chain.md",
+    "obsidian/architecture/Pipeline.md",
+    "obsidian/story/06 - Outcomes.md",
+    "obsidian/story/05 - What We Fixed.md",
+    "obsidian/story/04 - Test Results.md",
+    "obsidian/story",
+    "obsidian/observability",
+    "obsidian/metrics",
+    "obsidian/fixes",
+    "obsidian/cases",
+    "obsidian/architecture",
+    "obsidian",
+    "app/services/__pycache__/ragas_evaluation_service.cpython-312.pyc",
+    "app/services/ragas_evaluation_service.py",
+    "skills-lock.json",
+    "Untitled.canvas"
+  ]
+}

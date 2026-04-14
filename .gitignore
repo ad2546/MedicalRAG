@@ -17,12 +17,20 @@ wheels/
 
 # Data (large binary/csv files)
 data/
+Data/
 
 # Monocle trace files
 .monocle/
 
 # Playwright MCP browser state
 .playwright-mcp/
+
+# AI tool dirs
+.claudian/
+.qwen/
+.agents/
+skills/
+skills-lock.json
 
 # Coverage artifacts
 .coverage

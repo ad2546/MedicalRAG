@@ -18,7 +18,11 @@ class Settings(BaseSettings):
     llm_provider: str = "groq"
 
     # Groq (default LLM provider — fast, free tier, OpenAI-compatible)
+    # Keys 2-4 are used as fallbacks when a key hits its daily token limit (429).
     groq_api_key: str = ""
+    groq_api_key_2: str = ""
+    groq_api_key_3: str = ""
+    groq_api_key_4: str = ""
     groq_model_gen: str = "llama-3.3-70b-versatile"   # pipeline / diagnosis model
     groq_model_chat: str = "llama-3.3-70b-versatile"  # interactive chat model
 
@@ -32,7 +36,7 @@ class Settings(BaseSettings):
 
     # Okahu Cloud (monocle-apptrace)
     okahu_api_key: str = ""
-    okahu_service_name: str = "medicalchatbot_ni9wbg"
+    okahu_service_name: str = "medicalChatbot"
 
     # Embedding
     embedding_model: str = "all-MiniLM-L6-v2"
@@ -49,6 +53,15 @@ class Settings(BaseSettings):
     # App
     app_env: str = "development"
     log_level: str = "INFO"
+
+    # RAG Evaluation — custom LLM-as-judge (faithfulness, context_relevancy, answer_relevancy)
+    # Set ENABLE_EVALUATION=true to run these scores after every pipeline call.
+    enable_evaluation: bool = False
+
+    # RAGAS per-agent evaluation (faithfulness, answer_relevancy, context_precision)
+    # Evaluated independently for retrieval / initial / reflection / final stages.
+    # Requires: ragas + langchain-openai packages.
+    enable_ragas_evaluation: bool = False
 
     # Workflow endpoint (external Bearer token auth for Okahu Cloud / n8n)
     workflow_api_key: str = ""

@@ -31,20 +31,94 @@ from app.services.cache_service import cache_service
 logger = logging.getLogger(__name__)
 _otel_tracer = otel_trace.get_tracer("medicalrag.llm")
 
-# ── Lazy client singletons ─────────────────────────────────────────────────────
-_groq_client = None
-_oci_client = None
 
+# ── Groq key rotation manager ──────────────────────────────────────────────────
 
-def _get_groq_client():
-    global _groq_client
-    if _groq_client is None:
+class _GroqKeyRotator:
+    """
+    Rotates through up to 4 Groq API keys on 429 (rate-limit) errors.
+
+    Each key gets its own AsyncOpenAI client instance. When a key is exhausted
+    (HTTP 429 with 'tokens per day' or 'tokens per minute' in the error body),
+    the rotator marks it as depleted and retries with the next available key.
+
+    Keys are tried in order: GROQ_API_KEY → _2 → _3 → _4.
+    If all keys are exhausted, raises the last 429 error.
+    """
+
+    def __init__(self) -> None:
+        self._clients: list | None = None   # built lazily
+        self._current_idx: int = 0
+
+    def _build_clients(self) -> list:
         from openai import AsyncOpenAI
-        _groq_client = AsyncOpenAI(
-            api_key=settings.groq_api_key,
-            base_url="https://api.groq.com/openai/v1",
-        )
-    return _groq_client
+        keys = [
+            settings.groq_api_key,
+            settings.groq_api_key_2,
+            settings.groq_api_key_3,
+            settings.groq_api_key_4,
+        ]
+        clients = []
+        for k in keys:
+            stripped = (k or "").strip()
+            # Groq keys are ~56 chars; skip anything clearly truncated
+            if stripped and len(stripped) >= 40:
+                clients.append(AsyncOpenAI(
+                    api_key=stripped,
+                    base_url="https://api.groq.com/openai/v1",
+                ))
+            elif stripped:
+                logger.warning("Groq key ignored — looks truncated (%d chars)", len(stripped))
+        if not clients:
+            raise RuntimeError("No Groq API keys configured. Set GROQ_API_KEY in .env.")
+        logger.info("Groq key rotator initialised with %d key(s)", len(clients))
+        return clients
+
+    def _clients_list(self) -> list:
+        if self._clients is None:
+            self._clients = self._build_clients()
+        return self._clients
+
+    @staticmethod
+    def _is_rate_limit(exc: Exception) -> bool:
+        """Return True for 429 errors related to token-per-day/minute budgets."""
+        msg = str(exc).lower()
+        return "429" in msg or "rate_limit_exceeded" in msg or "rate limit" in msg
+
+    async def call(self, **kwargs) -> object:
+        """
+        Call client.chat.completions.create(**kwargs), rotating keys on 429.
+        Tries every available key before giving up.
+        """
+        clients = self._clients_list()
+        n = len(clients)
+        last_exc: Exception | None = None
+
+        for attempt in range(n):
+            idx = (self._current_idx + attempt) % n
+            client = clients[idx]
+            try:
+                result = await client.chat.completions.create(**kwargs)
+                # Success — lock in this index for next call
+                self._current_idx = idx
+                return result
+            except Exception as exc:
+                if self._is_rate_limit(exc):
+                    key_hint = f"key #{idx + 1}"
+                    logger.warning(
+                        "Groq %s rate-limited (429) — rotating to next key", key_hint
+                    )
+                    last_exc = exc
+                    continue   # try next key
+                raise          # non-429 errors propagate immediately
+
+        # All keys exhausted
+        logger.error("All %d Groq keys are rate-limited. Last error: %s", n, last_exc)
+        raise last_exc  # type: ignore[misc]
+
+
+_groq_rotator = _GroqKeyRotator()
+_oci_client = None
 
 
 def _get_oci_client():
@@ -139,7 +213,7 @@ class LLMService:
         # token counts in the "metadata" event).  A manual wrapper span is not
         # needed here — it would duplicate or shadow monocle's span and cause
         # Okahu to see the call as workflow.generic instead of GenAI.
-        response = await _get_groq_client().chat.completions.create(**kwargs)
+        response = await _groq_rotator.call(**kwargs)
         latency_ms = int((time.perf_counter() - t0) * 1000)
 
         text = response.choices[0].message.content
