@@ -40,15 +40,31 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def _agent_span(span_name: str, span_type: str = "inference"):
-    """Wrap an agent call in a monocle span (visible in Okahu) if monocle is available."""
-    if _MONOCLE_AVAILABLE:
+    """Wrap an agent call in a monocle span (visible in Okahu) if monocle is available.
+
+    monocle's amonocle_trace generator sometimes fails to stop after athrow() when the
+    wrapped code raises — we catch that RuntimeError and re-raise the original exception
+    so the pipeline sees the real error rather than a monocle instrumentation artefact.
+    """
+    if not _MONOCLE_AVAILABLE:
+        yield
+        return
+
+    _raised: BaseException | None = None
+    try:
         async with _amonocle_trace(
             span_name=span_name,
             attributes={"span.type": span_type},
         ):
-            yield
-    else:
-        yield
+            try:
+                yield
+            except BaseException as _exc:
+                _raised = _exc
+                raise
+    except RuntimeError as _rte:
+        if "generator didn't stop" in str(_rte) and _raised is not None:
+            raise _raised from None
+        raise
 
 
 def _sse(event: str, data: dict) -> str:
