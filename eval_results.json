@@ -1,0 +1,1832 @@
+[
+  {
+    "case": "01 STEMI",
+    "status": "ok",
+    "response": {
+      "case_id": "bc93b5e0-c363-475f-8a4c-298ab29d309d",
+      "initial_diagnosis": [
+        {
+          "condition": "Acute Myocardial Infarction (STEMI)",
+          "confidence": "high",
+          "evidence_ids": [
+            "e74293ff-62a2-43b1-a48e-ca1904371c28"
+          ],
+          "reasoning": "The patient presents with crushing chest pain radiating to the left arm, diaphoresis, nausea, and has elevated troponin I levels and ST elevation on ECG, which are all consistent with the diagnosis of STEMI as described in the guideline."
+        },
+        {
+          "condition": "Other chest pain",
+          "confidence": "low",
+          "evidence_ids": [
+            "9472414d-20f1-4dbb-bea2-457fda42e54c"
+          ],
+          "reasoning": "Although the patient has chest pain, the characteristics and associated symptoms and lab findings are more specific for STEMI, making other chest pain less likely."
+        },
+        {
+          "condition": "Appendicitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's symptoms do not align well with appendicitis, which typically presents with periumbilical pain migrating to the right lower quadrant, anorexia, and low-grade fever."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Acute Myocardial Infarction (STEMI)",
+          "confidence": "high",
+          "evidence_ids": [
+            "e74293ff-62a2-43b1-a48e-ca1904371c28"
+          ],
+          "reasoning": "The patient's symptoms of crushing chest pain, left arm radiation, diaphoresis, nausea, elevated troponin I levels, and ST elevation on ECG are consistent with STEMI as described in the guideline."
+        },
+        {
+          "condition": "Other chest pain",
+          "confidence": "low",
+          "evidence_ids": [
+            "9472414d-20f1-4dbb-bea2-457fda42e54c"
+          ],
+          "reasoning": "Although the patient has chest pain, the characteristics and associated symptoms and lab findings are more specific for STEMI, making other chest pain less likely."
+        },
+        {
+          "condition": "Appendicitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's symptoms do not align well with appendicitis, which typically presents with periumbilical pain migrating to the right lower quadrant, anorexia, and low-grade fever."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Acute Myocardial Infarction (STEMI)",
+          "confidence": "high",
+          "evidence_ids": [
+            "e74293ff-62a2-43b1-a48e-ca1904371c28"
+          ],
+          "reasoning": "The patient's symptoms of crushing chest pain, left arm radiation, diaphoresis, nausea, elevated troponin I levels, and ST elevation on ECG are consistent with STEMI as described in the guideline."
+        },
+        {
+          "condition": "Other chest pain",
+          "confidence": "low",
+          "evidence_ids": [
+            "9472414d-20f1-4dbb-bea2-457fda42e54c"
+          ],
+          "reasoning": "Although the patient has chest pain, the characteristics and associated symptoms and lab findings are more specific for STEMI, making other chest pain less likely."
+        },
+        {
+          "condition": "Appendicitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's symptoms do not align well with appendicitis, which typically presents with periumbilical pain migrating to the right lower quadrant, anorexia, and low-grade fever."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": true,
+      "cache_stats": {
+        "case_cache": {
+          "size": 1,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 2,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "02 Atrial Fibrillation",
+    "status": "ok",
+    "response": {
+      "case_id": "0efceda1-e6b9-44b1-b26c-889347d44375",
+      "initial_diagnosis": [
+        {
+          "condition": "Atrial Fibrillation (AFib)",
+          "confidence": "high",
+          "evidence_ids": [
+            "efa88414-58ae-4584-b7a0-184c00359444"
+          ],
+          "reasoning": "The patient's symptoms of palpitations, irregular heartbeat, mild dyspnea, and fatigue, along with the ECG findings of irregularly irregular rhythm and no P waves, are consistent with AFib."
+        },
+        {
+          "condition": "Pericardial tamponade",
+          "confidence": "low",
+          "evidence_ids": [
+            "f65ee3dc-7378-4967-97fb-a2243e3f41cc"
+          ],
+          "reasoning": "Although the patient presents with dyspnea, which is a common symptom of pericardial tamponade, there is no clear evidence of pericardial effusion or other characteristic echocardiographic findings."
+        },
+        {
+          "condition": "Hypertensive heart disease",
+          "confidence": "medium",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9"
+          ],
+          "reasoning": "The patient has a history of hypertension, which can contribute to the development of hypertensive heart disease, but the current symptoms and ECG findings are more suggestive of AFib."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Atrial Fibrillation (AFib)",
+          "confidence": "high",
+          "evidence_ids": [
+            "efa88414-58ae-4584-b7a0-184c00359444"
+          ],
+          "reasoning": "The patient's symptoms and ECG findings are consistent with AFib, and the provided guideline supports this diagnosis."
+        },
+        {
+          "condition": "Hypertensive heart disease",
+          "confidence": "low",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9"
+          ],
+          "reasoning": "While the patient has a history of hypertension, the current symptoms and ECG findings are more suggestive of AFib."
+        },
+        {
+          "condition": "Pericardial tamponade",
+          "confidence": "low",
+          "evidence_ids": [
+            "f65ee3dc-7378-4967-97fb-a2243e3f41cc"
+          ],
+          "reasoning": "There is no clear evidence of pericardial effusion or other characteristic echocardiographic findings to support this diagnosis."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Atrial Fibrillation (AFib)",
+          "confidence": "high",
+          "evidence_ids": [
+            "efa88414-58ae-4584-b7a0-184c00359444"
+          ],
+          "reasoning": "The patient's symptoms and ECG findings are consistent with AFib, and the provided guideline supports this diagnosis."
+        },
+        {
+          "condition": "Hypertensive heart disease",
+          "confidence": "low",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9"
+          ],
+          "reasoning": "While the patient has a history of hypertension, the current symptoms and ECG findings are more suggestive of AFib."
+        },
+        {
+          "condition": "Pericardial tamponade",
+          "confidence": "low",
+          "evidence_ids": [
+            "f65ee3dc-7378-4967-97fb-a2243e3f41cc"
+          ],
+          "reasoning": "There is no clear evidence of pericardial effusion or other characteristic echocardiographic findings to support this diagnosis."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 2,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 4,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "03 Aortic Dissection",
+    "status": "ok",
+    "response": {
+      "case_id": "516f1a37-6905-42f0-98b7-d52655481ac1",
+      "initial_diagnosis": [
+        {
+          "condition": "Aortic dissection type A",
+          "confidence": "high",
+          "evidence_ids": [
+            "8a57b1f6-d77a-47a0-92cc-1b6204085ddd"
+          ],
+          "reasoning": "The patient's symptoms of tearing chest pain radiating to the back, unequal blood pressure in arms, and widened mediastinum on CXR are consistent with aortic dissection type A."
+        },
+        {
+          "condition": "Myocardial infarction",
+          "confidence": "low",
+          "evidence_ids": [
+            "9472414d-20f1-4dbb-bea2-457fda42e54c"
+          ],
+          "reasoning": "Although the patient has a history of smoking and high blood pressure, the primary symptoms and lab results do not strongly suggest myocardial infarction."
+        },
+        {
+          "condition": "Pulmonary embolism",
+          "confidence": "medium",
+          "evidence_ids": [
+            "8a57b1f6-d77a-47a0-92cc-1b6204085ddd"
+          ],
+          "reasoning": "The patient's elevated D-dimer level could indicate pulmonary embolism, but the primary symptoms and other lab results are more consistent with aortic dissection."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Aortic dissection type A",
+          "confidence": "high",
+          "evidence_ids": [
+            "8a57b1f6-d77a-47a0-92cc-1b6204085ddd"
+          ],
+          "reasoning": "The patient's symptoms of tearing chest pain radiating to the back, unequal blood pressure in arms, and widened mediastinum on CXR are consistent with aortic dissection type A, and the patient's history of Marfan syndrome increases the risk."
+        },
+        {
+          "condition": "Pulmonary embolism",
+          "confidence": "low",
+          "evidence_ids": [
+            "8a57b1f6-d77a-47a0-92cc-1b6204085ddd"
+          ],
+          "reasoning": "Although the patient has an elevated D-dimer level, the primary symptoms and other lab results are more consistent with aortic dissection type A."
+        },
+        {
+          "condition": "Myocardial infarction",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The patient's primary symptoms and lab results do not strongly suggest myocardial infarction."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Aortic dissection type A",
+          "confidence": "high",
+          "evidence_ids": [
+            "8a57b1f6-d77a-47a0-92cc-1b6204085ddd"
+          ],
+          "reasoning": "The patient's symptoms of tearing chest pain radiating to the back, unequal blood pressure in arms, and widened mediastinum on CXR are consistent with aortic dissection type A, and the patient's history of Marfan syndrome increases the risk."
+        },
+        {
+          "condition": "Pulmonary embolism",
+          "confidence": "low",
+          "evidence_ids": [
+            "8a57b1f6-d77a-47a0-92cc-1b6204085ddd"
+          ],
+          "reasoning": "Although the patient has an elevated D-dimer level, the primary symptoms and other lab results are more consistent with aortic dissection type A."
+        },
+        {
+          "condition": "Myocardial infarction",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The patient's primary symptoms and lab results do not strongly suggest myocardial infarction."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 3,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 6,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "04 Pulmonary Embolism",
+    "status": "ok",
+    "response": {
+      "case_id": "3db2a9ae-db44-41af-af8a-1eed94bf84e7",
+      "initial_diagnosis": [
+        {
+          "condition": "Pulmonary embolism",
+          "confidence": "high",
+          "evidence_ids": [
+            "3557d052-8c0c-447e-b214-aa3868342d23"
+          ],
+          "reasoning": "The patient presents with sudden dyspnea, pleuritic chest pain, hemoptysis, and leg swelling, which are consistent with pulmonary embolism, and the elevated D-dimer level supports this diagnosis."
+        },
+        {
+          "condition": "Pneumothorax",
+          "confidence": "medium",
+          "evidence_ids": [
+            "c8cc15ca-027b-40f2-858c-90b53262a075"
+          ],
+          "reasoning": "The patient's symptoms of sudden dyspnea and pleuritic chest pain could also be indicative of pneumothorax, but further diagnostic imaging such as chest X-ray or CT chest would be needed to confirm this diagnosis."
+        },
+        {
+          "condition": "Deep vein thrombosis",
+          "confidence": "low",
+          "evidence_ids": [
+            "3557d052-8c0c-447e-b214-aa3868342d23"
+          ],
+          "reasoning": "Given the patient's recent knee surgery, there is a risk of deep vein thrombosis, which could be a contributing factor to the patient's symptoms, but further evaluation would be needed to confirm this diagnosis."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Pulmonary embolism",
+          "confidence": "high",
+          "evidence_ids": [
+            "3557d052-8c0c-447e-b214-aa3868342d23"
+          ],
+          "reasoning": "The patient's symptoms of sudden dyspnea, pleuritic chest pain, and hemoptysis, along with the elevated D-dimer level, are consistent with pulmonary embolism."
+        },
+        {
+          "condition": "Pneumothorax",
+          "confidence": "low",
+          "evidence_ids": [
+            "c8cc15ca-027b-40f2-858c-90b53262a075"
+          ],
+          "reasoning": "While the patient's symptoms could be indicative of pneumothorax, the lack of specific findings such as diminished breath sounds, hyperresonance to percussion, or a visceral pleural line on imaging makes this diagnosis less likely."
+        },
+        {
+          "condition": "Deep vein thrombosis",
+          "confidence": "medium",
+          "evidence_ids": [
+            "3557d052-8c0c-447e-b214-aa3868342d23"
+          ],
+          "reasoning": "The patient's recent knee surgery and elevated D-dimer level increase the risk of deep vein thrombosis, but further evaluation is needed to confirm this diagnosis."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Pulmonary embolism",
+          "confidence": "high",
+          "evidence_ids": [
+            "3557d052-8c0c-447e-b214-aa3868342d23"
+          ],
+          "reasoning": "The patient's symptoms of sudden dyspnea, pleuritic chest pain, and hemoptysis, along with the elevated D-dimer level, are consistent with pulmonary embolism."
+        },
+        {
+          "condition": "Pneumothorax",
+          "confidence": "low",
+          "evidence_ids": [
+            "c8cc15ca-027b-40f2-858c-90b53262a075"
+          ],
+          "reasoning": "While the patient's symptoms could be indicative of pneumothorax, the lack of specific findings such as diminished breath sounds, hyperresonance to percussion, or a visceral pleural line on imaging makes this diagnosis less likely."
+        },
+        {
+          "condition": "Deep vein thrombosis",
+          "confidence": "medium",
+          "evidence_ids": [
+            "3557d052-8c0c-447e-b214-aa3868342d23"
+          ],
+          "reasoning": "The patient's recent knee surgery and elevated D-dimer level increase the risk of deep vein thrombosis, but further evaluation is needed to confirm this diagnosis."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 4,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 9,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "05 COPD Exacerbation",
+    "status": "ok",
+    "response": {
+      "case_id": "c68065d4-e415-4623-b1f5-d1713552910f",
+      "initial_diagnosis": [
+        {
+          "condition": "COPD exacerbation",
+          "confidence": "high",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "The patient's symptoms of worsening dyspnea, increased sputum production, and purulent sputum are consistent with a COPD exacerbation, and the ABG results show hypercapnia and hypoxemia, supporting this diagnosis."
+        },
+        {
+          "condition": "Pneumonia",
+          "confidence": "medium",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "Although the patient's symptoms could be consistent with pneumonia, the provided evidence does not include a chest X-ray (CXR) to confirm this diagnosis, but it is a potential differential diagnosis that needs to be ruled out."
+        },
+        {
+          "condition": "Acute respiratory failure",
+          "confidence": "medium",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367",
+            "737bc42f-c945-41d5-8d9d-4228f34c581c"
+          ],
+          "reasoning": "The patient's ABG results show hypercapnia and hypoxemia, which are consistent with acute respiratory failure, but more information is needed to determine the severity and underlying cause."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "COPD exacerbation",
+          "confidence": "high",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "The patient's symptoms of worsening dyspnea, increased sputum production, and purulent sputum are consistent with a COPD exacerbation, and the ABG results show hypercapnia and hypoxemia, supporting this diagnosis."
+        },
+        {
+          "condition": "Acute hypercapnic respiratory failure",
+          "confidence": "high",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "The patient's ABG results show hypercapnia (PaCO2 >45 mmHg) and hypoxemia, which are consistent with acute hypercapnic respiratory failure."
+        },
+        {
+          "condition": "Pneumonia",
+          "confidence": "medium",
+          "evidence_ids": [
+            "5d02d2ba-1df8-4cf7-998c-fe8348a63dc7",
+            "a660fe6f-9f24-4e7c-a5f8-95ceb0020a90"
+          ],
+          "reasoning": "Although the patient's symptoms could be consistent with pneumonia, further testing such as a CXR is needed to confirm this diagnosis."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "COPD exacerbation",
+          "confidence": "high",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "The patient's symptoms of worsening dyspnea, increased sputum production, and purulent sputum are consistent with a COPD exacerbation, and the ABG results show hypercapnia and hypoxemia, supporting this diagnosis."
+        },
+        {
+          "condition": "Acute hypercapnic respiratory failure",
+          "confidence": "high",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "The patient's ABG results show hypercapnia (PaCO2 >45 mmHg) and hypoxemia, which are consistent with acute hypercapnic respiratory failure."
+        },
+        {
+          "condition": "Pneumonia",
+          "confidence": "medium",
+          "evidence_ids": [
+            "5d02d2ba-1df8-4cf7-998c-fe8348a63dc7",
+            "a660fe6f-9f24-4e7c-a5f8-95ceb0020a90"
+          ],
+          "reasoning": "Although the patient's symptoms could be consistent with pneumonia, further testing such as a CXR is needed to confirm this diagnosis."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 5,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 12,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "06 Community Acquired Pneumonia",
+    "status": "ok",
+    "response": {
+      "case_id": "ff6ba793-13c1-4f8e-9adf-27ccd0b1a0b9",
+      "initial_diagnosis": [
+        {
+          "condition": "Pneumonia",
+          "confidence": "high",
+          "evidence_ids": [
+            "5d02d2ba-1df8-4cf7-998c-fe8348a63dc7"
+          ],
+          "reasoning": "The patient presents with classic symptoms of pneumonia, including productive cough, fever, and pleuritic pain, and the chest X-ray shows lobar consolidation, which is consistent with pneumonia."
+        },
+        {
+          "condition": "COPD exacerbation",
+          "confidence": "low",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "Although the patient has a productive cough and increased sputum volume, there is no mention of a history of COPD or typical COPD symptoms such as dyspnea, and the patient is not a smoker."
+        },
+        {
+          "condition": "Pulmonary Tuberculosis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c0fbf138-9eab-4a90-afe7-aef320755c84"
+          ],
+          "reasoning": "The patient's symptoms could be consistent with pulmonary TB, but the duration of symptoms is not specified, and there is no mention of night sweats, weight loss, or other typical TB symptoms."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Pneumonia",
+          "confidence": "high",
+          "evidence_ids": [
+            "5d02d2ba-1df8-4cf7-998c-fe8348a63dc7"
+          ],
+          "reasoning": "The patient presents with classic symptoms of pneumonia, including productive cough, fever, and pleuritic pain, and the chest X-ray shows lobar consolidation, which is consistent with pneumonia."
+        },
+        {
+          "condition": "Pulmonary Tuberculosis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c0fbf138-9eab-4a90-afe7-aef320755c84"
+          ],
+          "reasoning": "Although the patient's symptoms could be consistent with pulmonary TB, the duration of symptoms is not specified, and there is no mention of night sweats, weight loss, or other typical TB symptoms."
+        },
+        {
+          "condition": "COPD exacerbation",
+          "confidence": "low",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "The patient lacks a history of COPD and typical COPD symptoms such as dyspnea, and the patient is not a smoker, making this diagnosis less likely."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Pneumonia",
+          "confidence": "high",
+          "evidence_ids": [
+            "5d02d2ba-1df8-4cf7-998c-fe8348a63dc7"
+          ],
+          "reasoning": "The patient presents with classic symptoms of pneumonia, including productive cough, fever, and pleuritic pain, and the chest X-ray shows lobar consolidation, which is consistent with pneumonia."
+        },
+        {
+          "condition": "Pulmonary Tuberculosis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c0fbf138-9eab-4a90-afe7-aef320755c84"
+          ],
+          "reasoning": "Although the patient's symptoms could be consistent with pulmonary TB, the duration of symptoms is not specified, and there is no mention of night sweats, weight loss, or other typical TB symptoms."
+        },
+        {
+          "condition": "COPD exacerbation",
+          "confidence": "low",
+          "evidence_ids": [
+            "3009de85-3457-4508-8c2e-5cf2da808367"
+          ],
+          "reasoning": "The patient lacks a history of COPD and typical COPD symptoms such as dyspnea, and the patient is not a smoker, making this diagnosis less likely."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 6,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 14,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "07 Ischemic Stroke",
+    "status": "ok",
+    "response": {
+      "case_id": "bd55939a-6c4a-4b0a-9f67-c82447fbc6ab",
+      "initial_diagnosis": [
+        {
+          "condition": "Stroke",
+          "confidence": "high",
+          "evidence_ids": [],
+          "reasoning": "The patient's sudden right-sided facial droop, arm weakness, and slurred speech are classic symptoms of a stroke, particularly given the patient's history of atrial fibrillation and high blood pressure."
+        },
+        {
+          "condition": "Bell's Palsy",
+          "confidence": "medium",
+          "evidence_ids": [
+            "eed6dea5-aae7-432a-8650-c3103586c13e"
+          ],
+          "reasoning": "The patient's unilateral facial weakness could be consistent with Bell's Palsy, but the presence of other focal neurological deficits such as arm weakness and slurred speech makes this diagnosis less likely."
+        },
+        {
+          "condition": "Transient Ischemic Attack (TIA)",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The patient's symptoms could also be consistent with a TIA, but the lack of evidence of transient symptoms makes this diagnosis less likely."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Stroke",
+          "confidence": "high",
+          "evidence_ids": [
+            "8e58bc25-f7fe-42bf-876b-0778e7c40889",
+            "eed6dea5-aae7-432a-8650-c3103586c13e"
+          ],
+          "reasoning": "The patient's sudden right-sided facial droop, arm weakness, and slurred speech are classic symptoms of a stroke, particularly given the patient's history of atrial fibrillation and high blood pressure."
+        },
+        {
+          "condition": "Bell's Palsy",
+          "confidence": "low",
+          "evidence_ids": [
+            "eed6dea5-aae7-432a-8650-c3103586c13e"
+          ],
+          "reasoning": "While the patient's unilateral facial weakness could be consistent with Bell's Palsy, the presence of other focal neurological deficits such as arm weakness and slurred speech makes this diagnosis less likely."
+        },
+        {
+          "condition": "Transient Ischemic Attack (TIA)",
+          "confidence": "low",
+          "evidence_ids": [
+            "8e58bc25-f7fe-42bf-876b-0778e7c40889"
+          ],
+          "reasoning": "The patient's symptoms could also be consistent with a TIA, but the lack of evidence of transient symptoms makes this diagnosis less likely."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Stroke",
+          "confidence": "high",
+          "evidence_ids": [
+            "8e58bc25-f7fe-42bf-876b-0778e7c40889",
+            "eed6dea5-aae7-432a-8650-c3103586c13e"
+          ],
+          "reasoning": "The patient's sudden right-sided facial droop, arm weakness, and slurred speech are classic symptoms of a stroke, particularly given the patient's history of atrial fibrillation and high blood pressure."
+        },
+        {
+          "condition": "Bell's Palsy",
+          "confidence": "low",
+          "evidence_ids": [
+            "eed6dea5-aae7-432a-8650-c3103586c13e"
+          ],
+          "reasoning": "While the patient's unilateral facial weakness could be consistent with Bell's Palsy, the presence of other focal neurological deficits such as arm weakness and slurred speech makes this diagnosis less likely."
+        },
+        {
+          "condition": "Transient Ischemic Attack (TIA)",
+          "confidence": "low",
+          "evidence_ids": [
+            "8e58bc25-f7fe-42bf-876b-0778e7c40889"
+          ],
+          "reasoning": "The patient's symptoms could also be consistent with a TIA, but the lack of evidence of transient symptoms makes this diagnosis less likely."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 7,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 16,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "08 Subarachnoid Haemorrhage",
+    "status": "ok",
+    "response": {
+      "case_id": "fce587f9-24fa-4b76-b595-f1b984120aa8",
+      "initial_diagnosis": [
+        {
+          "condition": "Subarachnoid Haemorrhage (SAH)",
+          "confidence": "high",
+          "evidence_ids": [
+            "3b8de449-05af-483c-87e0-50261cba2db6"
+          ],
+          "reasoning": "The patient's symptoms of thunderclap headache, neck stiffness, photophobia, vomiting, and loss of consciousness, combined with the CT head showing hyperdensity in basal cisterns, are highly suggestive of SAH."
+        },
+        {
+          "condition": "Meningitis bacterial",
+          "confidence": "medium",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "While the patient's symptoms of severe headache, neck stiffness, and photophobia could be consistent with bacterial meningitis, the absence of fever and the specific findings on the CT head make SAH a more likely diagnosis."
+        },
+        {
+          "condition": "Other causes of thunderclap headache",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "Other potential causes of thunderclap headache, such as cerebral venous sinus thrombosis or reversible cerebral vasoconstriction syndrome, are less likely given the patient's presentation and the findings on the CT head."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Subarachnoid Haemorrhage (SAH)",
+          "confidence": "high",
+          "evidence_ids": [
+            "3b8de449-05af-483c-87e0-50261cba2db6"
+          ],
+          "reasoning": "The patient's symptoms of thunderclap headache, neck stiffness, photophobia, vomiting, and loss of consciousness, combined with the CT head showing hyperdensity in basal cisterns, are highly suggestive of SAH."
+        },
+        {
+          "condition": "Meningitis bacterial",
+          "confidence": "low",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "While the patient's symptoms could be consistent with bacterial meningitis, the absence of fever and the specific findings on the CT head make SAH a more likely diagnosis."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Subarachnoid Haemorrhage (SAH)",
+          "confidence": "high",
+          "evidence_ids": [
+            "3b8de449-05af-483c-87e0-50261cba2db6"
+          ],
+          "reasoning": "The patient's symptoms of thunderclap headache, neck stiffness, photophobia, vomiting, and loss of consciousness, combined with the CT head showing hyperdensity in basal cisterns, are highly suggestive of SAH."
+        },
+        {
+          "condition": "Meningitis bacterial",
+          "confidence": "low",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "While the patient's symptoms could be consistent with bacterial meningitis, the absence of fever and the specific findings on the CT head make SAH a more likely diagnosis."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 8,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 18,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "09 Bacterial Meningitis",
+    "status": "ok",
+    "response": {
+      "case_id": "b168a662-a659-4025-bf4a-26f4f37e09dd",
+      "initial_diagnosis": [
+        {
+          "condition": "Meningitis bacterial",
+          "confidence": "high",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "Patient presents with severe headache, neck stiffness, fever, photophobia, and CSF analysis shows high WBC, low glucose, and high protein, consistent with bacterial meningitis."
+        },
+        {
+          "condition": "Malaria falciparum",
+          "confidence": "low",
+          "evidence_ids": [
+            "0ece6110-8074-4b6f-bd87-c181eee381bc"
+          ],
+          "reasoning": "While the patient has fever and headache, there is no clear indication of travel to an endemic area or other typical symptoms of malaria, making this diagnosis less likely."
+        },
+        {
+          "condition": "Viral meningitis",
+          "confidence": "medium",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "The patient's symptoms could also be consistent with viral meningitis, although the CSF analysis is more indicative of bacterial meningitis."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Meningitis bacterial",
+          "confidence": "high",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "Patient's symptoms and CSF analysis are consistent with bacterial meningitis, and the presence of high WBC, low glucose, and high protein in CSF supports this diagnosis."
+        },
+        {
+          "condition": "Subarachnoid Haemorrhage (SAH)",
+          "confidence": "medium",
+          "evidence_ids": [
+            "3b8de449-05af-483c-87e0-50261cba2db6"
+          ],
+          "reasoning": "Patient's severe headache, neck stiffness, and photophobia could also be indicative of SAH, but the absence of a 'thunderclap' headache and negative CT head findings would be necessary to rule out this diagnosis."
+        },
+        {
+          "condition": "Viral meningitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "While the patient's symptoms could be consistent with viral meningitis, the CSF analysis is more indicative of bacterial meningitis."
+        },
+        {
+          "condition": "Malaria falciparum",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "There is no clear indication of travel to an endemic area or other typical symptoms of malaria, making this diagnosis less likely."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Meningitis bacterial",
+          "confidence": "high",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "Patient's symptoms and CSF analysis are consistent with bacterial meningitis, and the presence of high WBC, low glucose, and high protein in CSF supports this diagnosis."
+        },
+        {
+          "condition": "Subarachnoid Haemorrhage (SAH)",
+          "confidence": "medium",
+          "evidence_ids": [
+            "3b8de449-05af-483c-87e0-50261cba2db6"
+          ],
+          "reasoning": "Patient's severe headache, neck stiffness, and photophobia could also be indicative of SAH, but the absence of a 'thunderclap' headache and negative CT head findings would be necessary to rule out this diagnosis."
+        },
+        {
+          "condition": "Viral meningitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "594a8a68-5ab8-44da-ba90-f1a9ec9704c9"
+          ],
+          "reasoning": "While the patient's symptoms could be consistent with viral meningitis, the CSF analysis is more indicative of bacterial meningitis."
+        },
+        {
+          "condition": "Malaria falciparum",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "There is no clear indication of travel to an endemic area or other typical symptoms of malaria, making this diagnosis less likely."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 9,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 21,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "10 Acute Pancreatitis",
+    "status": "ok",
+    "response": {
+      "case_id": "68608288-97e8-42a1-a489-6d7659df22a3",
+      "initial_diagnosis": [
+        {
+          "condition": "Acute pancreatitis",
+          "confidence": "high",
+          "evidence_ids": [
+            "31b3d1a0-24cf-48ec-808c-73fda5ae0368"
+          ],
+          "reasoning": "The patient's symptoms of severe epigastric pain radiating to the back, nausea, vomiting, fever, and elevated lipase and amylase levels are consistent with acute pancreatitis, and the patient's history of gallstones is a common etiology."
+        },
+        {
+          "condition": "Gallstone disease",
+          "confidence": "medium",
+          "evidence_ids": [
+            "31b3d1a0-24cf-48ec-808c-73fda5ae0368"
+          ],
+          "reasoning": "The patient's history of gallstones and the presence of severe epigastric pain radiating to the back could be related to gallstone disease, but the elevated lipase and amylase levels suggest acute pancreatitis as a more likely diagnosis."
+        },
+        {
+          "condition": "Appendicitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "Although the patient has abdominal pain and elevated WBC, the pain is described as epigastric rather than periumbilical or right lower quadrant, making appendicitis less likely."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Acute pancreatitis",
+          "confidence": "high",
+          "evidence_ids": [
+            "31b3d1a0-24cf-48ec-808c-73fda5ae0368"
+          ],
+          "reasoning": "The patient's symptoms and laboratory results, including severe epigastric pain radiating to the back, nausea, vomiting, fever, and significantly elevated lipase and amylase levels, are consistent with acute pancreatitis."
+        },
+        {
+          "condition": "Gallstone disease",
+          "confidence": "low",
+          "evidence_ids": [
+            "31b3d1a0-24cf-48ec-808c-73fda5ae0368"
+          ],
+          "reasoning": "While the patient has a history of gallstones, the current presentation is more indicative of acute pancreatitis, a known complication of gallstone disease."
+        },
+        {
+          "condition": "Appendicitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's pain is epigastric rather than periumbilical or right lower quadrant, and other symptoms do not align closely with appendicitis."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Acute pancreatitis",
+          "confidence": "high",
+          "evidence_ids": [
+            "31b3d1a0-24cf-48ec-808c-73fda5ae0368"
+          ],
+          "reasoning": "The patient's symptoms and laboratory results, including severe epigastric pain radiating to the back, nausea, vomiting, fever, and significantly elevated lipase and amylase levels, are consistent with acute pancreatitis."
+        },
+        {
+          "condition": "Gallstone disease",
+          "confidence": "low",
+          "evidence_ids": [
+            "31b3d1a0-24cf-48ec-808c-73fda5ae0368"
+          ],
+          "reasoning": "While the patient has a history of gallstones, the current presentation is more indicative of acute pancreatitis, a known complication of gallstone disease."
+        },
+        {
+          "condition": "Appendicitis",
+          "confidence": "low",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's pain is epigastric rather than periumbilical or right lower quadrant, and other symptoms do not align closely with appendicitis."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 10,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 23,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "11 GI Bleed - Upper",
+    "status": "ok",
+    "response": {
+      "case_id": "dac4b6e9-b125-48b8-8fb1-da03f88f1fb9",
+      "initial_diagnosis": [
+        {
+          "condition": "Upper gastrointestinal bleeding",
+          "confidence": "high",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient presents with haematemesis and melena, which are classic symptoms of upper gastrointestinal bleeding, and has a history of peptic ulcer disease and NSAID use, which are risk factors for this condition."
+        },
+        {
+          "condition": "Hypovolemic shock",
+          "confidence": "medium",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient's low blood pressure and high heart rate suggest hypovolemic shock, which can be caused by significant blood loss from upper gastrointestinal bleeding."
+        },
+        {
+          "condition": "Iron deficiency anemia",
+          "confidence": "low",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient's low hemoglobin level could be due to iron deficiency anemia, but this is less likely given the acute presentation of haematemesis and melena."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Upper gastrointestinal bleeding",
+          "confidence": "high",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient presents with haematemesis and melena, which are classic symptoms of upper gastrointestinal bleeding, and has a history of peptic ulcer disease and NSAID use, which are risk factors for this condition."
+        },
+        {
+          "condition": "Hypovolemic shock",
+          "confidence": "high",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient's low blood pressure, high heart rate, and low hemoglobin level suggest significant blood loss and hypovolemic shock."
+        },
+        {
+          "condition": "Acute kidney injury",
+          "confidence": "medium",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient's elevated BUN and low hemoglobin level may indicate acute kidney injury, which can be caused by hypovolemic shock and upper gastrointestinal bleeding."
+        },
+        {
+          "condition": "Iron deficiency anemia",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "While the patient's low hemoglobin level could be due to iron deficiency anemia, the acute presentation of haematemesis and melena makes this less likely."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Upper gastrointestinal bleeding",
+          "confidence": "high",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient presents with haematemesis and melena, which are classic symptoms of upper gastrointestinal bleeding, and has a history of peptic ulcer disease and NSAID use, which are risk factors for this condition."
+        },
+        {
+          "condition": "Hypovolemic shock",
+          "confidence": "high",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient's low blood pressure, high heart rate, and low hemoglobin level suggest significant blood loss and hypovolemic shock."
+        },
+        {
+          "condition": "Acute kidney injury",
+          "confidence": "medium",
+          "evidence_ids": [
+            "0cabc0c0-2dbf-4336-af8a-26d1e51d3ae3"
+          ],
+          "reasoning": "The patient's elevated BUN and low hemoglobin level may indicate acute kidney injury, which can be caused by hypovolemic shock and upper gastrointestinal bleeding."
+        },
+        {
+          "condition": "Iron deficiency anemia",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "While the patient's low hemoglobin level could be due to iron deficiency anemia, the acute presentation of haematemesis and melena makes this less likely."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 11,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 25,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "12 Appendicitis",
+    "status": "ok",
+    "response": {
+      "case_id": "fd337a36-7405-491f-bdb8-4706f638b354",
+      "initial_diagnosis": [
+        {
+          "condition": "Appendicitis",
+          "confidence": "high",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's symptoms of periumbilical pain migrating to RLQ, anorexia, low-grade fever, and nausea are classic for appendicitis, and the USS showing a non-compressible appendix 9mm further supports this diagnosis."
+        },
+        {
+          "condition": "Small Bowel Obstruction (SBO)",
+          "confidence": "low",
+          "evidence_ids": [
+            "38d8e828-103f-4102-a75a-2a99243527ca"
+          ],
+          "reasoning": "While the patient's abdominal pain and nausea could be consistent with SBO, the lack of reported vomiting, abdominal distension, or other characteristic SBO symptoms makes this diagnosis less likely."
+        },
+        {
+          "condition": "Gastroenteritis or other gastrointestinal infection",
+          "confidence": "medium",
+          "evidence_ids": [],
+          "reasoning": "The patient's symptoms of anorexia, nausea, and low-grade fever could be consistent with a gastrointestinal infection, but the USS findings and elevated WBC suggest a more specific diagnosis like appendicitis."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Appendicitis",
+          "confidence": "high",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's symptoms and USS findings are classic for appendicitis, with a non-compressible appendix 9mm and elevated WBC."
+        },
+        {
+          "condition": "Small Bowel Obstruction (SBO)",
+          "confidence": "low",
+          "evidence_ids": [
+            "38d8e828-103f-4102-a75a-2a99243527ca"
+          ],
+          "reasoning": "While SBO is considered, the lack of reported vomiting, abdominal distension, or other characteristic SBO symptoms makes this diagnosis less likely."
+        },
+        {
+          "condition": "Gastroenteritis or other gastrointestinal infection",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The USS findings and elevated WBC suggest a more specific diagnosis like appendicitis, making gastroenteritis or other gastrointestinal infections less likely."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Appendicitis",
+          "confidence": "high",
+          "evidence_ids": [
+            "c248f07a-d4a6-4c51-be71-41c1bb128134"
+          ],
+          "reasoning": "The patient's symptoms and USS findings are classic for appendicitis, with a non-compressible appendix 9mm and elevated WBC."
+        },
+        {
+          "condition": "Small Bowel Obstruction (SBO)",
+          "confidence": "low",
+          "evidence_ids": [
+            "38d8e828-103f-4102-a75a-2a99243527ca"
+          ],
+          "reasoning": "While SBO is considered, the lack of reported vomiting, abdominal distension, or other characteristic SBO symptoms makes this diagnosis less likely."
+        },
+        {
+          "condition": "Gastroenteritis or other gastrointestinal infection",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The USS findings and elevated WBC suggest a more specific diagnosis like appendicitis, making gastroenteritis or other gastrointestinal infections less likely."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 12,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 27,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "13 Diabetic Ketoacidosis",
+    "status": "ok",
+    "response": {
+      "case_id": "7423f9f4-bc57-4084-a7b3-66f4e8dbadd0",
+      "initial_diagnosis": [
+        {
+          "condition": "Diabetic Ketoacidosis",
+          "confidence": "high",
+          "evidence_ids": [
+            "fe621c8e-0bad-4f06-90b1-f9cbe51e3bbd"
+          ],
+          "reasoning": "The patient's symptoms of polyuria, polydipsia, nausea, abdominal pain, fruity breath, and altered consciousness, combined with lab results showing high glucose levels, low pH, low bicarbonate, and large ketones, are consistent with diabetic ketoacidosis, especially given the patient's history of type 1 diabetes."
+        },
+        {
+          "condition": "Alcoholic Ketoacidosis",
+          "confidence": "low",
+          "evidence_ids": [
+            "fe621c8e-0bad-4f06-90b1-f9cbe51e3bbd"
+          ],
+          "reasoning": "Although the patient's symptoms and lab results could also be consistent with alcoholic ketoacidosis, there is no mention of alcohol abuse in the patient's history, making this diagnosis less likely."
+        },
+        {
+          "condition": "Hepatic Failure",
+          "confidence": "low",
+          "evidence_ids": [
+            "4dfcb870-a869-4db8-9069-7d2979e930a0"
+          ],
+          "reasoning": "The patient's symptoms and lab results do not strongly suggest hepatic failure, and there is no mention of liver disease in the patient's history, making this diagnosis less likely."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Diabetic Ketoacidosis",
+          "confidence": "high",
+          "evidence_ids": [
+            "fe621c8e-0bad-4f06-90b1-f9cbe51e3bbd"
+          ],
+          "reasoning": "The patient's symptoms and lab results are consistent with diabetic ketoacidosis, especially given the patient's history of type 1 diabetes."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Diabetic Ketoacidosis",
+          "confidence": "high",
+          "evidence_ids": [
+            "fe621c8e-0bad-4f06-90b1-f9cbe51e3bbd"
+          ],
+          "reasoning": "The patient's symptoms and lab results are consistent with diabetic ketoacidosis, especially given the patient's history of type 1 diabetes."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 13,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 29,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "14 Acute Kidney Injury",
+    "status": "ok",
+    "response": {
+      "case_id": "b8c09c1b-adb8-4bfe-93e0-2c1474788b78",
+      "initial_diagnosis": [
+        {
+          "condition": "Acute Kidney Injury (AKI)",
+          "confidence": "high",
+          "evidence_ids": [
+            "d7630dd3-1462-4677-aa46-09c6e08f196c"
+          ],
+          "reasoning": "The patient's history of CKD stage 3, recent contrast CT, and current lab results (elevated creatinine and BUN) support this diagnosis."
+        },
+        {
+          "condition": "Nephrotic Syndrome",
+          "confidence": "medium",
+          "evidence_ids": [
+            "d7630dd3-1462-4677-aa46-09c6e08f196c"
+          ],
+          "reasoning": "The patient presents with edema and fatigue, which are common symptoms of nephrotic syndrome, but the diagnosis is not fully supported by the provided lab results."
+        },
+        {
+          "condition": "Hepatic Encephalopathy",
+          "confidence": "low",
+          "evidence_ids": [
+            "2128781a-4505-46dc-89bf-8c7eca58bf77",
+            "c3c45f7d-2fab-4a49-9af0-b3cec716a42f"
+          ],
+          "reasoning": "While the patient exhibits confusion, which is a symptom of hepatic encephalopathy, there is no clear evidence of liver dysfunction or other characteristic findings of HE in the provided information."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Acute Kidney Injury (AKI)",
+          "confidence": "high",
+          "evidence_ids": [
+            "2128781a-4505-46dc-89bf-8c7eca58bf77",
+            "c3c45f7d-2fab-4a49-9af0-b3cec716a42f",
+            "4dfcb870-a869-4db8-9069-7d2979e930a0"
+          ],
+          "reasoning": "The patient's history of CKD stage 3, recent contrast CT, and current lab results (elevated creatinine and BUN) strongly support this diagnosis."
+        },
+        {
+          "condition": "Contrast-Induced Nephropathy (CIN)",
+          "confidence": "high",
+          "evidence_ids": [
+            "2128781a-4505-46dc-89bf-8c7eca58bf77",
+            "c3c45f7d-2fab-4a49-9af0-b3cec716a42f",
+            "4dfcb870-a869-4db8-9069-7d2979e930a0"
+          ],
+          "reasoning": "Given the recent contrast CT and the patient's history of CKD stage 3, CIN is a highly plausible diagnosis that could be contributing to the patient's acute kidney injury."
+        },
+        {
+          "condition": "Hepatic Encephalopathy",
+          "confidence": "low",
+          "evidence_ids": [
+            "2128781a-4505-46dc-89bf-8c7eca58bf77",
+            "c3c45f7d-2fab-4a49-9af0-b3cec716a42f"
+          ],
+          "reasoning": "Although the patient presents with confusion, there is no clear evidence of liver dysfunction to support this diagnosis."
+        },
+        {
+          "condition": "Nephrotic Syndrome",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The diagnosis is not fully supported by the provided lab results, lacking evidence of heavy proteinuria and hypoalbuminemia."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Acute Kidney Injury (AKI)",
+          "confidence": "high",
+          "evidence_ids": [
+            "2128781a-4505-46dc-89bf-8c7eca58bf77",
+            "c3c45f7d-2fab-4a49-9af0-b3cec716a42f",
+            "4dfcb870-a869-4db8-9069-7d2979e930a0"
+          ],
+          "reasoning": "The patient's history of CKD stage 3, recent contrast CT, and current lab results (elevated creatinine and BUN) strongly support this diagnosis."
+        },
+        {
+          "condition": "Contrast-Induced Nephropathy (CIN)",
+          "confidence": "high",
+          "evidence_ids": [
+            "2128781a-4505-46dc-89bf-8c7eca58bf77",
+            "c3c45f7d-2fab-4a49-9af0-b3cec716a42f",
+            "4dfcb870-a869-4db8-9069-7d2979e930a0"
+          ],
+          "reasoning": "Given the recent contrast CT and the patient's history of CKD stage 3, CIN is a highly plausible diagnosis that could be contributing to the patient's acute kidney injury."
+        },
+        {
+          "condition": "Hepatic Encephalopathy",
+          "confidence": "low",
+          "evidence_ids": [
+            "2128781a-4505-46dc-89bf-8c7eca58bf77",
+            "c3c45f7d-2fab-4a49-9af0-b3cec716a42f"
+          ],
+          "reasoning": "Although the patient presents with confusion, there is no clear evidence of liver dysfunction to support this diagnosis."
+        },
+        {
+          "condition": "Nephrotic Syndrome",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The diagnosis is not fully supported by the provided lab results, lacking evidence of heavy proteinuria and hypoalbuminemia."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 14,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 32,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "15 Sepsis",
+    "status": "ok",
+    "response": {
+      "case_id": "efd68415-fc5d-4bff-9edf-0ed8dca4c94d",
+      "initial_diagnosis": [
+        {
+          "condition": "Sepsis",
+          "confidence": "high",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's symptoms of fever, confusion, hypotension, rapid breathing, and decreased urine output, combined with lab results showing elevated lactate, WBC, and procalcitonin, are consistent with sepsis, particularly given the recent UTI."
+        },
+        {
+          "condition": "Severe UTI",
+          "confidence": "medium",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5"
+          ],
+          "reasoning": "The patient's history of recent UTI and current symptoms could indicate a severe UTI, but the presence of systemic symptoms such as confusion and hypotension suggests a more severe condition like sepsis."
+        },
+        {
+          "condition": "Septic shock",
+          "confidence": "medium",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's hypotension, fever, and evidence of organ dysfunction (decreased urine output, confusion) could indicate septic shock, a condition that often requires immediate intervention."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Sepsis",
+          "confidence": "high",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's symptoms and lab results, including elevated lactate, WBC, and procalcitonin, are consistent with sepsis, particularly given the recent UTI."
+        },
+        {
+          "condition": "Septic shock",
+          "confidence": "high",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's hypotension, fever, and evidence of organ dysfunction, such as decreased urine output and confusion, strongly suggest septic shock."
+        },
+        {
+          "condition": "Severe UTI",
+          "confidence": "low",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5"
+          ],
+          "reasoning": "While the patient has a history of recent UTI, the presence of systemic symptoms and severe lab abnormalities suggests that the condition has progressed beyond a simple UTI."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Sepsis",
+          "confidence": "high",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's symptoms and lab results, including elevated lactate, WBC, and procalcitonin, are consistent with sepsis, particularly given the recent UTI."
+        },
+        {
+          "condition": "Septic shock",
+          "confidence": "high",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's hypotension, fever, and evidence of organ dysfunction, such as decreased urine output and confusion, strongly suggest septic shock."
+        },
+        {
+          "condition": "Severe UTI",
+          "confidence": "low",
+          "evidence_ids": [
+            "08672a6e-03e3-4098-9cf0-a36f17b6cad5"
+          ],
+          "reasoning": "While the patient has a history of recent UTI, the presence of systemic symptoms and severe lab abnormalities suggests that the condition has progressed beyond a simple UTI."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 15,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 34,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "16 Infective Endocarditis",
+    "status": "ok",
+    "response": {
+      "case_id": "5be97eb5-aaf8-4ea0-a3ee-aa2a9aa7132a",
+      "initial_diagnosis": [
+        {
+          "condition": "Infective Endocarditis",
+          "confidence": "high",
+          "evidence_ids": [
+            "ef1331e1-710f-4cf5-87b4-95a0bafe46cb"
+          ],
+          "reasoning": "Patient presents with fever, fatigue, night sweats, new heart murmur, Janeway lesions, and splinter hemorrhages, which are all consistent with Infective Endocarditis, and blood cultures are positive for Staph aureus."
+        },
+        {
+          "condition": "Non-infective endocarditis",
+          "confidence": "low",
+          "evidence_ids": [
+            "3afde611-a730-4705-ba27-23f2b226f17a"
+          ],
+          "reasoning": "Although non-infective endocarditis is a consideration in patients with blood culture-negative endocarditis, the patient's positive blood cultures for Staph aureus make this diagnosis less likely."
+        },
+        {
+          "condition": "Valvular dysfunction due to bicuspid aortic valve",
+          "confidence": "medium",
+          "evidence_ids": [
+            "ef1331e1-710f-4cf5-87b4-95a0bafe46cb"
+          ],
+          "reasoning": "The patient has a history of bicuspid aortic valve, which may contribute to valvular dysfunction, but the presence of fever and positive blood cultures suggests an infectious etiology."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Infective Endocarditis",
+          "confidence": "high",
+          "evidence_ids": [
+            "ef1331e1-710f-4cf5-87b4-95a0bafe46cb"
+          ],
+          "reasoning": "Patient presents with fever, fatigue, night sweats, new heart murmur, Janeway lesions, and splinter hemorrhages, and blood cultures are positive for Staph aureus, meeting the modified Duke Criteria for definite IE."
+        },
+        {
+          "condition": "Non-infective endocarditis",
+          "confidence": "low",
+          "evidence_ids": [
+            "3afde611-a730-4705-ba27-23f2b226f17a"
+          ],
+          "reasoning": "Although non-infective endocarditis is a consideration, the patient's positive blood cultures for Staph aureus make this diagnosis less likely."
+        },
+        {
+          "condition": "Valvular dysfunction due to bicuspid aortic valve",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The patient's bicuspid aortic valve may contribute to valvular dysfunction, but the presence of fever and positive blood cultures suggests an infectious etiology is more likely."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Infective Endocarditis",
+          "confidence": "high",
+          "evidence_ids": [
+            "ef1331e1-710f-4cf5-87b4-95a0bafe46cb"
+          ],
+          "reasoning": "Patient presents with fever, fatigue, night sweats, new heart murmur, Janeway lesions, and splinter hemorrhages, and blood cultures are positive for Staph aureus, meeting the modified Duke Criteria for definite IE."
+        },
+        {
+          "condition": "Non-infective endocarditis",
+          "confidence": "low",
+          "evidence_ids": [
+            "3afde611-a730-4705-ba27-23f2b226f17a"
+          ],
+          "reasoning": "Although non-infective endocarditis is a consideration, the patient's positive blood cultures for Staph aureus make this diagnosis less likely."
+        },
+        {
+          "condition": "Valvular dysfunction due to bicuspid aortic valve",
+          "confidence": "low",
+          "evidence_ids": [],
+          "reasoning": "The patient's bicuspid aortic valve may contribute to valvular dysfunction, but the presence of fever and positive blood cultures suggests an infectious etiology is more likely."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 16,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 36,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "17 Pulmonary Sarcoidosis",
+    "status": "ok",
+    "response": {
+      "case_id": "855171dc-f5ab-43ac-a971-f35cdcaadb55",
+      "initial_diagnosis": [
+        {
+          "condition": "Sarcoidosis",
+          "confidence": "high",
+          "evidence_ids": [
+            "5d02d2ba-1df8-4cf7-998c-fe8348a63dc7"
+          ],
+          "reasoning": "Bilateral hilar lymphadenopathy and elevated ACE levels are characteristic of sarcoidosis, and the patient's symptoms such as dry cough, dyspnoea on exertion, and erythema nodosum are also consistent with this diagnosis."
+        },
+        {
+          "condition": "Pleural effusion",
+          "confidence": "medium",
+          "evidence_ids": [
+            "15871680-4aaa-4ca7-b411-9f60f982e67f"
+          ],
+          "reasoning": "The patient's symptoms of dyspnoea and dry cough could be indicative of a pleural effusion, but further diagnostic testing such as CXR or CT chest and thoracocentesis would be necessary to confirm this diagnosis."
+        },
+        {
+          "condition": "Heart failure exacerbation",
+          "confidence": "low",
+          "evidence_ids": [
+            "780d8f23-b3a0-49b7-bea3-95c8781f4e62"
+          ],
+          "reasoning": "While the patient presents with dyspnoea, there is no clear evidence of heart failure exacerbation such as orthopnoea, PND, or bilateral leg oedema, and BNP/NT-proBNP levels are not provided."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Sarcoidosis",
+          "confidence": "high",
+          "evidence_ids": [
+            "c0fbf138-9eab-4a90-afe7-aef320755c84"
+          ],
+          "reasoning": "Bilateral hilar lymphadenopathy, elevated ACE levels, and symptoms such as dry cough, dyspnoea on exertion, and erythema nodosum are characteristic of sarcoidosis."
+        },
+        {
+          "condition": "Pulmonary Tuberculosis",
+          "confidence": "medium",
+          "evidence_ids": [
+            "c0fbf138-9eab-4a90-afe7-aef320755c84"
+          ],
+          "reasoning": "Although the patient's symptoms do not fully align with typical TB presentation, the presence of bilateral hilar lymphadenopathy on CXR warrants consideration of this diagnosis."
+        },
+        {
+          "condition": "Heart Failure with Reduced Ejection Fraction",
+          "confidence": "low",
+          "evidence_ids": [
+            "780d8f23-b3a0-49b7-bea3-95c8781f4e62",
+            "c91cc877-f8ab-460f-9b7e-7ede75f2caaa"
+          ],
+          "reasoning": "The patient's symptoms of dyspnoea on exertion and fatigue could be indicative of heart failure, but the lack of clear evidence such as orthopnoea, PND, or bilateral leg oedema, and the absence of BNP/NT-proBNP levels, make this diagnosis less likely."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Sarcoidosis",
+          "confidence": "high",
+          "evidence_ids": [
+            "c0fbf138-9eab-4a90-afe7-aef320755c84"
+          ],
+          "reasoning": "Bilateral hilar lymphadenopathy, elevated ACE levels, and symptoms such as dry cough, dyspnoea on exertion, and erythema nodosum are characteristic of sarcoidosis."
+        },
+        {
+          "condition": "Pulmonary Tuberculosis",
+          "confidence": "medium",
+          "evidence_ids": [
+            "c0fbf138-9eab-4a90-afe7-aef320755c84"
+          ],
+          "reasoning": "Although the patient's symptoms do not fully align with typical TB presentation, the presence of bilateral hilar lymphadenopathy on CXR warrants consideration of this diagnosis."
+        },
+        {
+          "condition": "Heart Failure with Reduced Ejection Fraction",
+          "confidence": "low",
+          "evidence_ids": [
+            "780d8f23-b3a0-49b7-bea3-95c8781f4e62",
+            "c91cc877-f8ab-460f-9b7e-7ede75f2caaa"
+          ],
+          "reasoning": "The patient's symptoms of dyspnoea on exertion and fatigue could be indicative of heart failure, but the lack of clear evidence such as orthopnoea, PND, or bilateral leg oedema, and the absence of BNP/NT-proBNP levels, make this diagnosis less likely."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 17,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 39,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "18 Anaemia - Iron Deficiency",
+    "status": "ok",
+    "response": {
+      "case_id": "57d77007-4fce-4996-9d64-a9329a19976d",
+      "initial_diagnosis": [
+        {
+          "condition": "Iron deficiency anemia",
+          "confidence": "high",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9",
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's symptoms of fatigue, pallor, pica, koilonychia, and exertional dyspnea are consistent with iron deficiency anemia, and the lab results show low hemoglobin and ferritin levels, which support this diagnosis."
+        },
+        {
+          "condition": "Anemia of chronic disease",
+          "confidence": "medium",
+          "evidence_ids": [
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's symptoms and lab results could also be consistent with anemia of chronic disease, although the low ferritin level suggests iron deficiency anemia is more likely."
+        },
+        {
+          "condition": "Cardiac disorder",
+          "confidence": "low",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9",
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf"
+          ],
+          "reasoning": "The patient's symptoms of palpitations and exertional dyspnea could be consistent with a cardiac disorder, but the lab results and other evidence do not strongly support this diagnosis."
+        }
+      ],
+      "reflection_diagnosis": [
+        {
+          "condition": "Iron deficiency anemia",
+          "confidence": "high",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9",
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's symptoms and lab results, including low hemoglobin and ferritin levels, are consistent with iron deficiency anemia, which is likely caused by the patient's history of heavy menstrual bleeding."
+        },
+        {
+          "condition": "Anemia of chronic disease",
+          "confidence": "low",
+          "evidence_ids": [
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "While the patient's symptoms and lab results could be consistent with anemia of chronic disease, the low ferritin level and history of heavy menstrual bleeding make iron deficiency anemia a more likely diagnosis."
+        },
+        {
+          "condition": "Cardiac disorder",
+          "confidence": "medium",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9",
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf"
+          ],
+          "reasoning": "The patient's symptoms of palpitations and exertional dyspnea could be consistent with a cardiac disorder, and the comorbidities listed in the retrieved evidence, such as palpitations and aortic valve disorders, suggest that a cardiac disorder may be a contributing factor."
+        }
+      ],
+      "final_diagnosis": [
+        {
+          "condition": "Iron deficiency anemia",
+          "confidence": "high",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9",
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "The patient's symptoms and lab results, including low hemoglobin and ferritin levels, are consistent with iron deficiency anemia, which is likely caused by the patient's history of heavy menstrual bleeding."
+        },
+        {
+          "condition": "Anemia of chronic disease",
+          "confidence": "low",
+          "evidence_ids": [
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf",
+            "137f08f6-3da4-4a0e-9b6c-92659fd36242"
+          ],
+          "reasoning": "While the patient's symptoms and lab results could be consistent with anemia of chronic disease, the low ferritin level and history of heavy menstrual bleeding make iron deficiency anemia a more likely diagnosis."
+        },
+        {
+          "condition": "Cardiac disorder",
+          "confidence": "medium",
+          "evidence_ids": [
+            "291b80cc-bf05-4683-b80a-c4e8c5d0d2b9",
+            "80dafdb9-a1bc-4880-ba77-27cf76f2efaf"
+          ],
+          "reasoning": "The patient's symptoms of palpitations and exertional dyspnea could be consistent with a cardiac disorder, and the comorbidities listed in the retrieved evidence, such as palpitations and aortic valve disorders, suggest that a cardiac disorder may be a contributing factor."
+        }
+      ],
+      "disclaimer": "Not a medical diagnosis; consult a clinician before making any clinical decisions.",
+      "remaining_requests": null,
+      "trace_id": null,
+      "cache_hit": false,
+      "cache_stats": {
+        "case_cache": {
+          "size": 18,
+          "maxsize": 500,
+          "ttl_seconds": 3600
+        },
+        "llm_cache": {
+          "size": 41,
+          "maxsize": 2000,
+          "ttl_seconds": 86400
+        }
+      }
+    }
+  },
+  {
+    "case": "19 Systemic Lupus Erythematosus",
+    "status": "rate_limited"
+  },
+  {
+    "case": "20 Kawasaki Disease",
+    "status": "rate_limited"
+  }
+]

@@ -266,11 +266,16 @@ def run_case(
             resp.raise_for_status()
             data = resp.json()
 
-            diagnoses = data.get("diagnoses", [])
-            top = diagnoses[0] if diagnoses else {}
-            print(f"  top_dx:   {top.get('name', 'n/a')} ({top.get('confidence', '?')})")
-            print(f"  trace_id: {data.get('trace_id', 'n/a')}")
-            print(f"  stage:    {data.get('stage', 'n/a')}")
+            final_dx = data.get("final_diagnosis") or data.get("diagnoses") or []
+            top = final_dx[0] if final_dx else {}
+            condition = top.get("condition") or top.get("name") or "n/a"
+            confidence = top.get("confidence", "?")
+            n_final = len(final_dx)
+            n_initial = len(data.get("initial_diagnosis") or [])
+            n_reflection = len(data.get("reflection_diagnosis") or [])
+            print(f"  top_dx:   {condition} ({confidence})")
+            print(f"  stages:   initial={n_initial} reflection={n_reflection} final={n_final}")
+            print(f"  cache:    {'HIT' if data.get('cache_hit') else 'miss'}")
             return {"case": case.label, "status": "ok", "response": data}
 
         except httpx.HTTPStatusError as exc:
