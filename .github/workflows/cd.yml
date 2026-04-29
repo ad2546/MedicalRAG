@@ -59,11 +59,15 @@ jobs:
           ssh -i ~/.ssh/medrag.pem -o StrictHostKeyChecking=no \
             ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
           set -e
-          cd ~/medrag
+          cd ~/medrag/deploy
 
-          # Rebuild and restart only the changed services
+          # Free dangling images and build cache before restarting
+          docker system prune -f 2>/dev/null || true
+          df -h / | tail -1
+
+          # The n8n stack uses only pre-built images (no build:), so --build is a no-op here
           docker compose pull --quiet 2>/dev/null || true
-          docker compose up -d --build --remove-orphans
+          docker compose up -d --remove-orphans
 
           # Wait for n8n to become ready (up to 60s)
           for i in $(seq 1 12); do
