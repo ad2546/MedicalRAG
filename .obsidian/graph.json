@@ -1,72 +1,22 @@
 {
   "collapse-filter": false,
   "search": "",
-  "showTags": true,
+  "showTags": false,
   "showAttachments": false,
   "hideUnresolved": false,
   "showOrphans": true,
   "collapse-color-groups": false,
-  "colorGroups": [
-    {
-      "query": "tag:#hub",
-      "color": {
-        "a": 1,
-        "rgb": 16744272
-      }
-    },
-    {
-      "query": "tag:#story",
-      "color": {
-        "a": 1,
-        "rgb": 5614335
-      }
-    },
-    {
-      "query": "tag:#observability",
-      "color": {
-        "a": 1,
-        "rgb": 16753920
-      }
-    },
-    {
-      "query": "tag:#metrics",
-      "color": {
-        "a": 1,
-        "rgb": 5570560
-      }
-    },
-    {
-      "query": "tag:#architecture",
-      "color": {
-        "a": 1,
-        "rgb": 9699539
-      }
-    },
-    {
-      "query": "tag:#case",
-      "color": {
-        "a": 1,
-        "rgb": 16711935
-      }
-    },
-    {
-      "query": "tag:#fix",
-      "color": {
-        "a": 1,
-        "rgb": 16729344
-      }
-    }
-  ],
+  "colorGroups": [],
   "collapse-display": false,
-  "showArrow": true,
+  "showArrow": false,
   "textFadeMultiplier": 0,
-  "nodeSizeMultiplier": 1.4,
-  "lineSizeMultiplier": 1.2,
+  "nodeSizeMultiplier": 1,
+  "lineSizeMultiplier": 1,
   "collapse-forces": false,
-  "centerStrength": 0.518,
-  "repelStrength": 14,
+  "centerStrength": 0.518713248970312,
+  "repelStrength": 10,
   "linkStrength": 1,
-  "linkDistance": 80,
-  "scale": 0.9398203840569049,
+  "linkDistance": 250,
+  "scale": 1.3976532249253333,
   "close": false
 }

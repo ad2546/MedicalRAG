@@ -1,0 +1,20 @@
+[
+  {
+    "id": "HFBearerCred01",
+    "name": "HF Bearer",
+    "type": "httpHeaderAuth",
+    "data": {"name": "Authorization", "value": "Bearer __HF_TOKEN__"}
+  },
+  {
+    "id": "GroqBearerCred01",
+    "name": "Groq Bearer",
+    "type": "httpHeaderAuth",
+    "data": {"name": "Authorization", "value": "Bearer __GROQ_API_KEY__"}
+  },
+  {
+    "id": "MedRAGPgCred01",
+    "name": "MedRAG Postgres",
+    "type": "postgres",
+    "data": {"host": "postgres", "database": "medicalrag", "user": "postgres", "password": "__PG_PASSWORD__", "port": 5432, "ssl": "disable", "allowUnauthorizedCerts": false}
+  }
+]

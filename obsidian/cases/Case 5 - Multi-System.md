@@ -57,7 +57,7 @@ This is the most expensive trace:
 
 Every extra LLM call is visible in Okahu as another `workflow` span. The pipeline is working as designed — it's spending more compute on a harder case.
 
-→ [[story/04 - Test Results|Back to Test Results]]
+→ [[05 - Final Result|Back to Final Result]]
 
 ---
 

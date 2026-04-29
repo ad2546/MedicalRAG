@@ -42,7 +42,7 @@ tags: [case, cardiac, ACS, STEMI]
 - GI issue false positive: likely from "nausea" symptom matching GI docs — acceptable in differential
 - ACS correctly identified despite troponin being primary lab
 
-→ [[story/04 - Test Results|Back to Test Results]]
+→ [[05 - Final Result|Back to Final Result]]
 
 ---
 

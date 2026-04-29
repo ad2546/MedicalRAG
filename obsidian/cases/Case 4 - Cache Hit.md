@@ -66,7 +66,7 @@ Case 4 cost: **0 tokens** — served from cache
 
 Over 100 requests with 30% cache hit rate: saves ~2,400 tokens per cache hit → significant on free-tier Groq (100k TPD limit).
 
-→ [[story/04 - Test Results|Back to Test Results]]
+→ [[05 - Final Result|Back to Final Result]]
 
 ---
 

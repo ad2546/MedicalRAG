@@ -36,7 +36,7 @@ RAGAS runs 2 LLM calls internally:
 ### Phase 1 — Always 0.0 (broken)
 The evaluation prompt required every claim to be *literally present* in the context text. Clinical diagnoses are inferences — "Pneumonia" is not literally in a respiratory pathophysiology abstract.
 
-**Fix**: [[fixes/Faithfulness Prompt Fix|Relaxed the custom LLM-as-judge prompt]]
+**Fix**: [[04 - Fixes|Relaxed the custom LLM-as-judge prompt]]
 
 ### Phase 2 — RAGAS Faithfulness Truncated
 `max_tokens=512` caused RAGAS faithfulness LLM call to truncate mid-response.  

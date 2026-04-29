@@ -1,90 +1,71 @@
 ---
-tags: [hub, medicalrag, observability]
+tags: [hub, medicalrag, okahu, rag]
 cssclasses: [home]
 ---
 
-# MedicalRAG — AI Observability with Okahu Cloud
+# MedicalRAG — Making a RAG Physicians Can Trust
 
-> **How do you debug a black box?** You add visibility. This vault documents how we instrumented a medical RAG pipeline with [[observability/Okahu Cloud|Okahu Cloud]] and iterated to better performance — all driven by what the traces told us.
+> **The story of taking a black-box medical RAG pipeline, adding Okahu Cloud observability + RAGAS per-agent evaluation, finding the hallucinations and groundedness gaps, and fixing them — all measurable.**
 
 ---
 
-## The Story
+## The Narrative (5 chapters)
 
 ```
-Black Box RAG  →  Instrumented Pipeline  →  Measurable Quality
+Plan  →  Okahu Logging  →  Issues Found  →  Fixes  →  Final Result
 ```
 
-| Chapter | What Happened |
-|---|---|
-| [[story/01 - The Problem\|The Problem]] | RAG pipeline with no visibility |
-| [[story/02 - The Solution\|The Solution]] | Okahu Cloud + monocle-apptrace |
-| [[story/03 - Implementation\|Implementation]] | Wiring spans, RAGAS, key rotation |
-| [[story/04 - Test Results\|Test Results]] | 5 clinical cases, live traces |
-| [[story/05 - What We Fixed\|What We Fixed]] | Bugs found through observability |
-| [[story/06 - Outcomes\|Outcomes]] | Before vs after: measurable gains |
+| # | Chapter | Focus |
+|---|---------|-------|
+| 01 | [[01 - Project Plan\|Project Plan]] | Goal: groundedness, hallucination mitigation, clinical trust |
+| 02 | [[02 - Okahu Logging\|Okahu Logging]] | monocle + Okahu Cloud + custom spans |
+| 03 | [[03 - Issues Found\|Issues Found]] | Hallucinations, low groundedness, retrieval gaps — surfaced by traces |
+| 04 | [[04 - Fixes\|Fixes]] | Prompt fixes, task GC, key rotation, RAGAS resilience |
+| 05 | [[05 - Final Result\|Final Result]] | Measurable groundedness. Hallucinations detectable. Per-agent quality. |
 
 ---
 
-## The System
+## Headline Numbers
 
-```
-User → FastAPI → [[architecture/Pipeline|Pipeline]] → [[architecture/Agent Chain|4 Agents]] → Diagnosis
-                              ↓
-                    [[observability/Okahu Cloud|Okahu Cloud]] ← spans ← [[observability/Monocle Apptrace|monocle]]
-```
-
-- [[architecture/Pipeline|DiagnosisPipeline]] — orchestrates 4 agents in sequence
-- [[architecture/Agent Chain|Agent Chain]] — Retrieval → Diagnosis → Reflection → Validator
-- [[architecture/Services|Services]] — LLM, Embedding, Cache, Tracing, Evaluation
-- [[architecture/Database|Database]] — PostgreSQL + pgvector (HNSW cosine similarity)
+| Before Observability | After Observability |
+|---------------------|---------------------|
+| Faithfulness: **0.0** (broken/invisible) | Faithfulness: **0.70–0.91** per case |
+| Reflection value: unknown | Reflection Δ: **+0.85** (meningitis) |
+| Hallucination detection: impossible | `eval.faithfulness < 0.5` span alert |
+| Per-agent quality: black box | 5 RAGAS spans per pipeline run |
+| Rate limit: 1 key → outage | 4-key rotation + validation |
+| Test coverage: 40% | **80.28% (167 tests)** |
 
 ---
 
-## Evaluation Metrics
+## Evaluation Metrics (supporting)
 
-> RAGAS runs after every pipeline call — grading each agent independently.
-
-| Metric | Measures | Stage |
-|---|---|---|
-| [[metrics/Context Precision|Context Precision]] | Are retrieved docs relevant? | [[architecture/Agent Chain#Retrieval Agent\|Retrieval]] |
-| [[metrics/Faithfulness|Faithfulness]] | Is answer grounded in evidence? | [[architecture/Agent Chain#Diagnosis Agent\|Diagnosis]] |
-| [[metrics/Answer Relevancy|Answer Relevancy]] | Does answer address the question? | All stages |
-| [[metrics/Reflection Delta|Reflection Delta]] | Did self-critique improve quality? | [[architecture/Agent Chain#Reflection Agent\|Reflection]] |
+| Metric | Measures |
+|--------|----------|
+| [[metrics/Faithfulness\|Faithfulness]] | Is the diagnosis grounded in retrieved evidence? |
+| [[metrics/Context Precision\|Context Precision]] | Are retrieved docs relevant to the case? |
+| [[metrics/Answer Relevancy\|Answer Relevancy]] | Does the answer address the clinical question? |
+| [[metrics/Reflection Delta\|Reflection Delta]] | Did self-critique improve quality? |
 
 ---
 
-## 5 Test Cases
+## Clinical Cases (evidence)
 
-| Case | Condition | Notable Signal |
-|---|---|---|
-| [[cases/Case 1 - Cardiac\|Case 1]] | STEMI / ACS | 2 LLM spans, fast path |
-| [[cases/Case 2 - B-Symptoms\|Case 2]] | TB / Lymphoma | Re-retrieval triggered |
-| [[cases/Case 3 - Pediatric Fever\|Case 3]] | Mono / Rash | False positive caught |
-| [[cases/Case 4 - Cache Hit\|Case 4]] | Cache HIT | 0 LLM spans — visible! |
-| [[cases/Case 5 - Multi-System\|Case 5]] | HFrEF + CKD | ACS gap found |
-
----
-
-## Fixes Applied
-
-- [[fixes/Session Race Condition|Session Race Condition]] — asyncio background task bug
-- [[fixes/Faithfulness Prompt Fix|Faithfulness Prompt Fix]] — eval was too strict for clinical reasoning
-- [[fixes/Groq Key Rotation|Groq Key Rotation]] — 4-key pool with automatic failover
-- [[fixes/RAGAS Integration|RAGAS Integration]] — per-agent scoring, RAGAS + Groq + local embeddings
-- [[fixes/Task GC Fix|Task GC Fix]] — background tasks were silently dying
+| Case | Condition | Key Signal |
+|------|-----------|-----------|
+| [[cases/Case 1 - Cardiac\|Case 1]] | STEMI / ACS | 2 LLM spans, fast path, CP=1.00 |
+| [[cases/Case 2 - B-Symptoms\|Case 2]] | TB / Lymphoma | Re-retrieval triggered (3 spans) |
+| [[cases/Case 3 - Pediatric Fever\|Case 3]] | Mono / Rash | Leptospirosis false positive caught |
+| [[cases/Case 4 - Cache Hit\|Case 4]] | cached response | 0 LLM spans — visible |
+| [[cases/Case 5 - Multi-System\|Case 5]] | HFrEF + CKD | ACS gap surfaced |
 
 ---
 
-## Key Numbers
+## The Core Lesson
 
-| Before | After |
-|---|---|
-| faithfulness = 0.0 (all cases) | faithfulness = 0.7–0.9 (tuned) |
-| 1 API key → rate limit = down | 4-key pool → seamless rotation |
-| Agents invisible to Okahu | 4 RAGAS spans + reflection delta |
-| Background tasks GC'd silently | Held in `_background_tasks` set |
+> **You cannot improve what you cannot measure.**
 
----
+Without Okahu + RAGAS: RAG is a black box. Either it worked or it didn't.  
+With Okahu + RAGAS: every span is a diagnostic signal. Every hallucination is visible. Every agent is individually accountable.
 
-*[[obsidian/🏠 Home|← Back to Home]]*
+→ Start at [[01 - Project Plan|Project Plan]]

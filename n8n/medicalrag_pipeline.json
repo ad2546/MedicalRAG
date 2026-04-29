@@ -1,0 +1,134 @@
+{
+  "name": "MedicalRAG Pipeline (Retrieval → Diagnosis → Reflection → Validator)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger-node",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 400]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"symptoms\": [\"severe headache\", \"fever\", \"neck stiffness\", \"photophobia\"],\n  \"vitals\": {\"temp_c\": 39.4, \"hr\": 112, \"bp_sys\": 128, \"bp_dia\": 82, \"rr\": 20, \"spo2\": 97},\n  \"history\": {\"age\": 28, \"sex\": \"F\", \"conditions\": [], \"medications\": []},\n  \"labs\": {\"wbc\": 14.2, \"crp\": 78}\n}",
+        "options": {}
+      },
+      "id": "case-node",
+      "name": "Patient Case (Meningitis)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/workflow/run",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Content-Type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {"timeout": 60000}
+      },
+      "id": "pipeline-node",
+      "name": "Run Pipeline (/workflow/run)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [660, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "MedRAGBearerCred01",
+          "name": "MedicalRAG Bearer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst evIds = (lst) => Array.from(new Set((lst||[]).flatMap(d => d.evidence_ids || [])));\nconst topConf = (lst) => (lst && lst[0] && lst[0].confidence) || 'none';\nconst final = r.final_diagnosis || [];\nconst initial = r.initial_diagnosis || [];\nconst reflection = r.reflection_diagnosis || [];\nconst finalEv = evIds(final);\nreturn [{ json: {\n  case_id: r.case_id,\n  cache_hit: r.cache_hit,\n  trace_id: r.trace_id,\n  initial: { top: initial[0]?.condition, confidence: topConf(initial), evidence_ids: evIds(initial) },\n  reflection: { top: reflection[0]?.condition, confidence: topConf(reflection), evidence_ids: evIds(reflection) },\n  final: { top: final[0]?.condition, confidence: topConf(final), evidence_ids: finalEv, count: final.length },\n  diagnoses: final,\n  ungrounded: finalEv.length === 0,\n  has_high_confidence: final.some(d => d.confidence === 'high')\n}}];"
+      },
+      "id": "parse-node",
+      "name": "Parse Stages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "loose"},
+          "conditions": [
+            {
+              "id": "ungrounded-cond",
+              "leftValue": "={{ $json.ungrounded }}",
+              "rightValue": true,
+              "operator": {"type": "boolean", "operation": "true", "singleValue": true}
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "guard-node",
+      "name": "Hallucination Gate (faith < 0.5)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1140, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "a1", "name": "alert", "value": "HALLUCINATION_DETECTED", "type": "string"},
+            {"id": "a2", "name": "trace_id", "value": "={{ $json.trace_id }}", "type": "string"},
+            {"id": "a3", "name": "reason", "value": "no_evidence_ids_in_final", "type": "string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "alert-node",
+      "name": "Flag For Review",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1380, 280]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id": "p1", "name": "status", "value": "APPROVED", "type": "string"},
+            {"id": "p2", "name": "trace_id", "value": "={{ $json.trace_id }}", "type": "string"},
+            {"id": "p3", "name": "diagnoses", "value": "={{ $json.diagnoses }}", "type": "array"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "approve-node",
+      "name": "Approved Output",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1380, 520]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {"main": [[{"node": "Patient Case (Meningitis)", "type": "main", "index": 0}]]},
+    "Patient Case (Meningitis)": {"main": [[{"node": "Run Pipeline (/workflow/run)", "type": "main", "index": 0}]]},
+    "Run Pipeline (/workflow/run)": {"main": [[{"node": "Parse Stages", "type": "main", "index": 0}]]},
+    "Parse Stages": {"main": [[{"node": "Hallucination Gate (faith < 0.5)", "type": "main", "index": 0}]]},
+    "Hallucination Gate (faith < 0.5)": {
+      "main": [
+        [{"node": "Flag For Review", "type": "main", "index": 0}],
+        [{"node": "Approved Output", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {"executionOrder": "v1"},
+  "pinData": {}
+}

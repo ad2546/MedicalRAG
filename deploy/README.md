@@ -1,178 +1,113 @@
-# OCI Free Tier Deployment
+# MedicalRAG — EC2 Deployment (n8n native, no Python)
 
-## Architecture
+Single-host deploy of n8n + pgvector. Stack runs entirely in n8n: signup, login, diagnose pipeline (HF embeddings → pgvector → Groq → reflection → Okahu traces), chat, and the SPA frontend.
 
-```
-OCI Compute VM (Always Free ARM — A1.Flex)
-└── Docker Compose
-    ├── medicalrag_api   (FastAPI + uvicorn, port 8000)
-    └── medicalrag_postgres  (pgvector/pgvector:pg16, internal only)
-```
+## Sizing
 
-## Step 1 — Create the OCI Compute Instance
+- **Recommended**: t3.small (2 GB RAM)
+- **Free tier**: t2.micro (1 GB) — tight, may swap. Add 1 GB swap.
+- 20 GB gp3 storage
 
-In **OCI Console → Compute → Instances → Create Instance**:
-
-| Setting | Value |
-|---------|-------|
-| Shape | VM.Standard.A1.Flex (Always Free) |
-| OCPUs | 1 |
-| Memory | 6 GB |
-| Image | Canonical Ubuntu 22.04 |
-| Boot volume | 50 GB (free) |
-| SSH key | Upload your public key |
-
-Click **Create**.  Note the **Public IP** when the instance is RUNNING.
-
-## Step 2 — Open Port 8000 in the VCN
-
-OCI Console → Networking → Virtual Cloud Networks → your VCN →
-Security Lists → Default Security List → **Add Ingress Rule**:
-
-| Field | Value |
-|-------|-------|
-| Source CIDR | 0.0.0.0/0 |
-| IP Protocol | TCP |
-| Destination Port | 8000 |
-
-## Step 3 — Configure Instance Principal (recommended)
-
-This lets the VM call OCI GenAI **without** copying your API key.
-
-### 3a. Create a Dynamic Group
-
-OCI Console → Identity → Dynamic Groups → Create:
-- Name: `medicalrag-instances`
-- Rule: `instance.compartment.id = 'ocid1.compartment.oc1..YOUR_COMPARTMENT_OCID'`
-
-### 3b. Create a Policy
-
-OCI Console → Identity → Policies → Create (at root tenancy or compartment level):
-```
-Allow dynamic-group medicalrag-instances to use generative-ai-family in compartment <your-compartment-name>
-```
-
-## Step 4 — Set Up the VM
-
-SSH into your new instance (default user is `ubuntu`):
+## EC2 Launch
 
 ```bash
-ssh ubuntu@<YOUR_VM_PUBLIC_IP>
+# AMI: Ubuntu 22.04
+# Instance type: t3.small (or t2.micro for free tier)
+# Security group inbound: 22 (your IP) + 5678 (0.0.0.0/0 or your IP)
+# Storage: 20 GB gp3
 ```
 
-Then run the setup script (either clone the repo first, or pipe it):
+## Server-side setup
 
 ```bash
-# Clone repo
-git clone https://github.com/YOUR_USERNAME/MedicalRAG.git /opt/medicalrag
-cd /opt/medicalrag
+# 1. install docker
+sudo apt-get update -y
+sudo apt-get install -y docker.io docker-compose-plugin
+sudo usermod -aG docker ubuntu
+exit   # log back in for group change
 
-# Run setup (installs Docker, opens firewall)
-bash deploy/setup-vm.sh
-newgrp docker   # activate docker group without re-login
-```
+# 2. (t2.micro only) add swap to avoid OOM
+sudo fallocate -l 1G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
-## Step 5 — Configure Environment
+# 3. copy the deploy/ folder up
+#    on your laptop:
+scp -r -i key.pem deploy ubuntu@<ec2-dns>:~/medrag
 
-```bash
-cd /opt/medicalrag
+# 4. on EC2: configure
+cd ~/medrag
 cp .env.example .env
 nano .env
+#   HF_TOKEN=hf_...
+#   GROQ_API_KEY=gsk_...
+#   OKAHU_API_KEY=okh_...
+#   N8N_OWNER_EMAIL=admin@yourdomain
+#   N8N_OWNER_PASSWORD=ChangeMe123!
+#   N8N_HOST=<ec2-public-dns>
+#   WEBHOOK_URL=http://<ec2-public-dns>:5678/
+
+# 5. start postgres + n8n
+docker compose up -d
+docker compose logs -f postgres   # wait until: "documents loaded: 721"
+                                  #             "hnsw index ensured"
+# Ctrl-C
+docker compose logs -f n8n        # wait until: "Editor is now accessible"
+# Ctrl-C
+
+# 6. bootstrap (imports creds + workflows + activates them)
+chmod +x bootstrap.sh
+./bootstrap.sh
 ```
 
-Minimum required changes:
+## Smoke test
 
 ```bash
-# Strong random password for Postgres
-POSTGRES_PASSWORD=$(python3 -c "import secrets; print(secrets.token_hex(16))")
+# UI in browser
+open http://<ec2-dns>:5678/webhook/login
 
-# Strong secret for JWT signing
-AUTH_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")
+# CLI
+TOKEN=$(curl -s -X POST http://<ec2-dns>:5678/webhook/signup \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"demo@test.com","password":"hunter2demo"}' | jq -r .token)
 
-# Random API key for the /workflow/run endpoint
-WORKFLOW_API_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")
-
-# Your OCI compartment OCID (from OCI Console → Identity → Compartments)
-OCI_COMPARTMENT_ID=ocid1.compartment.oc1..xxxxxx
-
-# Use Instance Principal (no key file needed on the VM)
-OCI_USE_INSTANCE_PRINCIPAL=true
-
-# Your Okahu Cloud API key and app ID
-OKAHU_API_KEY=okh_xxxxxxxx
-OKAHU_SERVICE_NAME=medicalchatbot_ni9wbg
+curl -X POST http://<ec2-dns>:5678/webhook/diagnose \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' -d '{}' | jq '.final_diagnosis[0]'
 ```
 
-You can generate all secrets at once:
-```bash
-echo "POSTGRES_PASSWORD=$(python3 -c "import secrets; print(secrets.token_hex(16))")"
-echo "AUTH_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_hex(32))")"
-echo "WORKFLOW_API_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))")"
-```
+## Okahu trace association (one-time)
 
-## Step 6 — Deploy
+After first diagnosis run:
+1. portal.okahu.co → **Components** → **Discover Workflows** → `medrag_n8n` appears
+2. Click `medrag_n8n` → **+ Add Application** → pick `medrag_n8n` (or create new)
+3. Future traces auto-route to that app
 
-```bash
-bash deploy/deploy.sh
-```
+## Files
 
-The script will:
-1. Build the Docker image
-2. Start Postgres + API
-3. Run a health check
+| File | Purpose |
+|---|---|
+| `docker-compose.yml` | n8n + pgvector services |
+| `.env.example` | secrets template |
+| `init-db.sql` | pgvector + pgcrypto + `n8n_users` table |
+| `documents-schema.sql` | `documents` table DDL (auto-loaded) |
+| `documents.sql.gz` | 721-row data dump (1.7 MB) |
+| `seed-docs.sh` | gunzips + restores docs + HNSW index |
+| `bootstrap/*.json` | workflow definitions + cred template |
+| `bootstrap.sh` | imports creds + workflows, then activates |
 
-## Step 7 — Seed Documents (first deploy only)
+## Production hardening (later)
 
-Wait for the API to be healthy, then seed the knowledge base:
+Plain HTTP on :5678 v1. To upgrade:
+1. Add Caddy reverse proxy (`caddy:2-alpine` service)
+2. `Caddyfile`: `<dns> { reverse_proxy n8n:5678 }`
+3. Open 80/443, close 5678 to public
+4. Set `N8N_PROTOCOL=https` + `WEBHOOK_URL=https://<dns>/`
 
-```bash
-docker exec medicalrag_api python -m scripts.seed_documents_expanded --count 10   # test with 10
-docker exec medicalrag_api python -m scripts.seed_documents_expanded               # all 50
-```
+## Costs
 
-## Verify
-
-```bash
-curl http://<YOUR_VM_PUBLIC_IP>:8000/health
-# {"status":"ok","env":"production","database":"online"}
-```
-
-## Updates
-
-To redeploy after code changes:
-
-```bash
-cd /opt/medicalrag
-git pull
-bash deploy/deploy.sh
-```
-
-## Useful Commands
-
-```bash
-# View logs
-docker compose -f docker-compose.prod.yml logs -f api
-
-# Restart API only
-docker compose -f docker-compose.prod.yml restart api
-
-# Connect to Postgres
-docker exec -it medicalrag_postgres psql -U postgres -d medicalrag
-
-# Check cache stats
-curl -H "Authorization: Bearer $WORKFLOW_API_KEY" \
-  http://localhost:8000/workflow/cache/stats
-```
-
-## Okahu Cloud — After Deployment
-
-Once the app is running on OCI and receiving traffic:
-
-1. Make a test diagnosis request to generate a trace
-2. In Okahu Cloud portal → your app `medicalchatbot_ni9wbg` → Workflows
-3. Traces from the OCI VM should appear within ~30 seconds
-
-If still not showing, check:
-```bash
-docker compose -f docker-compose.prod.yml logs api 2>&1 | grep -i "okahu\|monocle\|otel"
-```
+- t3.small: ~$15/mo (no free tier)
+- t2.micro: free for 12 months (750 hr/mo)
+- HF Inference: free ≤30k req/mo
+- Groq: free tier 30K TPM
+- Okahu Cloud: free tier

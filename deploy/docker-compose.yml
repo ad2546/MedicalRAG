@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: medrag-pg
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-password}
+      POSTGRES_DB: medicalrag
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+      - ./documents-schema.sql:/docker-entrypoint-initdb.d/10-docs-schema.sql:ro
+      - ./documents.sql.gz:/seed/documents.sql.gz:ro
+      - ./seed-docs.sh:/docker-entrypoint-initdb.d/20-seed-docs.sh:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d medicalrag"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  n8n:
+    image: n8nio/n8n:2.18.4
+    container_name: medrag-n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      N8N_HOST: ${N8N_HOST:-localhost}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      WEBHOOK_URL: ${WEBHOOK_URL:-http://localhost:5678/}
+      NODE_FUNCTION_ALLOW_BUILTIN: crypto
+      N8N_RUNNERS_ENABLED: "true"
+      N8N_SECURE_COOKIE: "false"
+      GENERIC_TIMEZONE: UTC
+      DB_TYPE: sqlite
+    volumes:
+      - n8ndata:/home/node/.n8n
+      - ./bootstrap:/bootstrap:ro
+    ports:
+      - "5678:5678"
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  n8ndata:

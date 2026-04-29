@@ -11,10 +11,14 @@
             "id": "f4e4d306b15aa99f",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "obsidian/02 - Okahu Logging.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "02 - Okahu Logging"
             }
           }
         ]
@@ -90,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "obsidian/cases/Case 5 - Multi-System.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -99,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Case 5 - Multi-System"
             }
           },
           {
@@ -108,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "obsidian/cases/Case 5 - Multi-System.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from Case 5 - Multi-System"
             }
           },
           {
@@ -150,12 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "obsidian/cases/Case 5 - Multi-System.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Case 5 - Multi-System"
             }
           },
           {
@@ -190,42 +197,42 @@
   },
   "active": "f4e4d306b15aa99f",
   "lastOpenFiles": [
-    "obsidian/observability/Okahu Cloud.md",
-    "obsidian/🏠 Home.md",
-    "obsidian/fixes/Task GC Fix.md",
-    "obsidian/fixes/RAGAS Integration.md",
-    "obsidian/fixes/Groq Key Rotation.md",
-    "obsidian/fixes/Faithfulness Prompt Fix.md",
-    "obsidian/fixes/Session Race Condition.md",
+    "obsidian/cases/Case 1 - Cardiac.md",
+    "obsidian/metrics/Answer Relevancy.md",
+    "obsidian/metrics/Faithfulness.md",
+    "obsidian/metrics/Reflection Delta.md",
+    "obsidian/metrics/Context Precision.md",
     "obsidian/cases/Case 5 - Multi-System.md",
     "obsidian/cases/Case 4 - Cache Hit.md",
     "obsidian/cases/Case 3 - Pediatric Fever.md",
     "obsidian/cases/Case 2 - B-Symptoms.md",
-    "obsidian/cases/Case 1 - Cardiac.md",
-    "obsidian/metrics/Reflection Delta.md",
-    "obsidian/metrics/Answer Relevancy.md",
-    "obsidian/metrics/Context Precision.md",
-    "obsidian/metrics/Faithfulness.md",
-    "obsidian/observability/Trace Flow.md",
-    "obsidian/observability/Span Types.md",
-    "obsidian/observability/Monocle Apptrace.md",
-    "obsidian/architecture/Database.md",
-    "obsidian/architecture/Services.md",
-    "obsidian/architecture/Agent Chain.md",
-    "obsidian/architecture/Pipeline.md",
-    "obsidian/story/06 - Outcomes.md",
-    "obsidian/story/05 - What We Fixed.md",
-    "obsidian/story/04 - Test Results.md",
-    "obsidian/story",
-    "obsidian/observability",
-    "obsidian/metrics",
-    "obsidian/fixes",
-    "obsidian/cases",
-    "obsidian/architecture",
-    "obsidian",
-    "app/services/__pycache__/ragas_evaluation_service.cpython-312.pyc",
-    "app/services/ragas_evaluation_service.py",
-    "skills-lock.json",
+    "obsidian/05 - Final Result.md",
+    "obsidian/04 - Fixes.md",
+    "obsidian/03 - Issues Found.md",
+    "obsidian/02 - Okahu Logging.md",
+    "obsidian/tests/test_llm_service.md",
+    "obsidian/01 - Project Plan.md",
+    "obsidian/tests/test_evaluation_service.md",
+    "obsidian/tests/test_diagnosis.md",
+    "obsidian/tests/test_cache_service.md",
+    "obsidian/tests/test_auth_core.md",
+    "obsidian/tests/test_api.md",
+    "obsidian/tests/Test Suite Overview.md",
+    "obsidian/tests/test_validator.md",
+    "obsidian/tests/test_tracing_service_extended.md",
+    "obsidian/tests/test_tracing_service.md",
+    "obsidian/tests/test_routers_workflow.md",
+    "obsidian/tests/test_routers_extended.md",
+    "obsidian/tests",
+    "tests/__pycache__/test_tracing_service_extended.cpython-312-pytest-8.3.4.pyc",
+    "tests/__pycache__/test_routers_extended.cpython-312-pytest-8.3.4.pyc",
+    "tests/__pycache__/test_llm_service_extended.cpython-312-pytest-8.3.4.pyc",
+    "tests/test_routers_extended.py",
+    "tests/test_llm_service_extended.py",
+    "tests/test_tracing_service_extended.py",
+    "tests/__pycache__/test_routers_workflow.cpython-312-pytest-8.3.4.pyc",
+    "tests/__pycache__/test_routers_chat.cpython-312-pytest-8.3.4.pyc",
+    "tests/__pycache__/test_routers_auth.cpython-312-pytest-8.3.4.pyc",
     "Untitled.canvas"
   ]
 }

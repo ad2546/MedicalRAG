@@ -1,0 +1,381 @@
+{
+  "id": "MedRAGNative01",
+  "name": "MedicalRAG Native (n8n-only: HF + Postgres + Groq)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "medrag-test",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "trigger",
+      "name": "Webhook Trigger",
+      "webhookId": "medrag-test-webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        100,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"symptoms\": [\n    \"severe headache\",\n    \"fever\",\n    \"neck stiffness\",\n    \"photophobia\"\n  ],\n  \"vitals\": {\n    \"temp_c\": 39.4,\n    \"hr\": 112,\n    \"bp_sys\": 128,\n    \"bp_dia\": 82,\n    \"rr\": 20,\n    \"spo2\": 97\n  },\n  \"history\": {\n    \"age\": 28,\n    \"sex\": \"F\",\n    \"conditions\": [],\n    \"medications\": []\n  },\n  \"labs\": {\n    \"wbc\": 14.2,\n    \"crp\": 78\n  }\n}",
+        "options": {}
+      },
+      "id": "case",
+      "name": "Patient Case",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $input.first().json;\nconst sx = (c.symptoms || []).join(', ');\nconst v = c.vitals || {};\nconst vstr = `temp ${v.temp_c}C, HR ${v.hr}, BP ${v.bp_sys}/${v.bp_dia}, RR ${v.rr}, SpO2 ${v.spo2}`;\nconst labs = c.labs ? Object.entries(c.labs).map(([k,v])=>`${k}=${v}`).join(', ') : '';\nconst query = `Patient: ${sx}. Vitals: ${vstr}. Labs: ${labs}.`;\nreturn [{ json: { ...c, query_text: query } }];"
+      },
+      "id": "buildq",
+      "name": "Build Query Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({inputs: $json.query_text}) }}",
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "embed",
+      "name": "HF Embed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HFBearerCred01",
+          "name": "HF Bearer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "let r = $input.first().json;\nlet vec = r.body !== undefined ? r.body : r;\nif (Array.isArray(vec[0])) vec = vec[0];\nif (vec.length !== 384) throw new Error('expected 384 dims, got '+vec.length+' shape='+JSON.stringify(r).slice(0,200));\nconst lit = '[' + vec.map(x => Number(x).toFixed(8)).join(',') + ']';\nconst prev = $('Build Query Text').first().json;\nreturn [{ json: { ...prev, vector: lit } }];"
+      },
+      "id": "veclit",
+      "name": "Vector Literal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT id::text AS id, content, source, evidence_type, 1 - (embedding <=> '{{ $json.vector }}'::vector) AS score FROM documents ORDER BY embedding <=> '{{ $json.vector }}'::vector LIMIT 5;",
+        "options": {}
+      },
+      "id": "retrieve",
+      "name": "Retrieve Top-5",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1200,
+        400
+      ],
+      "credentials": {
+        "postgres": {
+          "id": "MedRAGPgCred01",
+          "name": "MedRAG Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const docs = $input.all().map(i => i.json);\nconst ctx = docs.map((d,i)=>`[doc ${i+1}] id=${d.id} source=${d.source||'n/a'} type=${d.evidence_type||'n/a'}\\n${(d.content||'').slice(0,2000)}`).join('\\n\\n');\nconst evidence_ids = docs.map(d=>d.id);\nconst c = $('Patient Case').first().json;\nconst sx = (c.symptoms||[]).join(', ');\nconst v = c.vitals||{};\nconst labs = c.labs ? Object.entries(c.labs).map(([k,v])=>`${k}=${v}`).join(', ') : 'none';\nconst h = c.history||{};\nconst userPrompt = `PATIENT CASE\\nSymptoms: ${sx}\\nVitals: temp ${v.temp_c}C, HR ${v.hr}, BP ${v.bp_sys}/${v.bp_dia}, RR ${v.rr}, SpO2 ${v.spo2}\\nHistory: age ${h.age}, sex ${h.sex}, conditions ${(h.conditions||[]).join(',')||'none'}\\nLabs: ${labs}\\n\\nRETRIEVED EVIDENCE\\n${ctx}\\n\\nReturn ONLY JSON.`;\nreturn [{ json: { user_prompt: userPrompt, evidence_ids, docs, case: c } }];"
+      },
+      "id": "fmt",
+      "name": "Format Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model:'llama-3.3-70b-versatile',temperature:0.2,response_format:{type:'json_object'},messages:[{role:'system',content:\"You are a clinical decision-support assistant generating a differential diagnosis.\\nYou must return ONLY a JSON object with this exact structure:\\n{\\n  \\\"diagnoses\\\": [\\n    {\\\"condition\\\": \\\"<condition name>\\\", \\\"confidence\\\": \\\"<low|medium|high>\\\", \\\"evidence_ids\\\": [\\\"<doc_id_uuid>\\\"], \\\"reasoning\\\": \\\"<1-2 sentence reasoning>\\\"}\\n  ],\\n  \\\"reasoning\\\": \\\"<overall reasoning paragraph>\\\",\\n  \\\"needs_reretrival\\\": false,\\n  \\\"missing_evidence_hint\\\": null\\n}\\nRules:\\n- List 3-5 differentials ranked by likelihood.\\n- confidence must be one of low|medium|high.\\n- evidence_ids must reference only IDs from provided documents.\\n- Do NOT fabricate claims unsupported by evidence.\\n- Set needs_reretrival=true and describe missing_evidence_hint if evidence insufficient.\"},{role:'user',content:$json.user_prompt}]}) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "diagnose",
+      "name": "Groq Diagnose",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1640,
+        400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GroqBearerCred01",
+          "name": "Groq Bearer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst raw = r.choices?.[0]?.message?.content || '{}';\nlet parsed; try { parsed = JSON.parse(raw); } catch(e) { parsed = { diagnoses:[], reasoning:'parse_error', needs_reretrival:false }; }\nconst ctx = $('Format Context').first().json;\nreturn [{ json: { initial: parsed, user_prompt_initial: ctx.user_prompt, evidence_ids: ctx.evidence_ids, docs: ctx.docs, case: ctx.case } }];"
+      },
+      "id": "parsediag",
+      "name": "Parse Diagnosis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1860,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model:'llama-3.3-70b-versatile',temperature:0.2,response_format:{type:'json_object'},messages:[{role:'system',content:\"You are a senior clinical reviewer critiquing a differential diagnosis.\\nReturn ONLY JSON: {\\\"diagnoses\\\":[{\\\"condition\\\":\\\"...\\\",\\\"confidence\\\":\\\"low|medium|high\\\",\\\"evidence_ids\\\":[\\\"...\\\"],\\\"reasoning\\\":\\\"...\\\"}],\\\"reasoning\\\":\\\"...\\\",\\\"needs_reretrival\\\":false,\\\"missing_evidence_hint\\\":null}\\nJob: critique each initial diagnosis, elevate under-weighted, demote over-weighted, set needs_reretrival=true if evidence missing. evidence_ids must come from provided docs.\"},{role:'user',content: $json.user_prompt_initial + '\\n\\nINITIAL DIAGNOSIS:\\n' + ($json.initial.diagnoses||[]).map(d=>'- '+d.condition+' ['+d.confidence+']: '+d.reasoning).join('\\n') + '\\n\\nINITIAL REASONING:\\n' + ($json.initial.reasoning||'') + '\\n\\nCritique and revise.'}]}) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "reflect",
+      "name": "Groq Reflect",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "GroqBearerCred01",
+          "name": "Groq Bearer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst raw = r.choices?.[0]?.message?.content || '{}';\nlet parsed; try { parsed = JSON.parse(raw); } catch(e) { parsed = { diagnoses:[], reasoning:'parse_error', needs_reretrival:false }; }\nconst prev = $('Parse Diagnosis').first().json;\nreturn [{ json: { initial: prev.initial, reflection: parsed, evidence_ids: prev.evidence_ids, case: prev.case } }];"
+      },
+      "id": "parserefl",
+      "name": "Parse Reflection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $input.first().json;\nconst uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;\nconst allowed = new Set(j.evidence_ids);\nconst filt = (lst) => (lst||[]).map(d => ({...d, evidence_ids: (d.evidence_ids||[]).filter(e => uuidRe.test(e) && allowed.has(e))}));\nconst final_diagnoses = filt(j.reflection.diagnoses);\nreturn [{ json: {\n  case_id: j.case.case_id || null,\n  initial_diagnosis: filt(j.initial.diagnoses),\n  reflection_diagnosis: final_diagnoses,\n  final_diagnosis: final_diagnoses,\n  retrieved_evidence_ids: j.evidence_ids,\n  needs_reretrival: !!j.reflection.needs_reretrival,\n  disclaimer: 'Not a medical diagnosis; consult a clinician.'\n} }];"
+      },
+      "id": "validate",
+      "name": "Validator",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2520,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Patient Case",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Patient Case": {
+      "main": [
+        [
+          {
+            "node": "Build Query Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Query Text": {
+      "main": [
+        [
+          {
+            "node": "HF Embed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HF Embed": {
+      "main": [
+        [
+          {
+            "node": "Vector Literal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vector Literal": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Top-5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Top-5": {
+      "main": [
+        [
+          {
+            "node": "Format Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Context": {
+      "main": [
+        [
+          {
+            "node": "Groq Diagnose",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Diagnose": {
+      "main": [
+        [
+          {
+            "node": "Parse Diagnosis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Diagnosis": {
+      "main": [
+        [
+          {
+            "node": "Groq Reflect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Reflect": {
+      "main": [
+        [
+          {
+            "node": "Parse Reflection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Reflection": {
+      "main": [
+        [
+          {
+            "node": "Validator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

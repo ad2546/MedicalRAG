@@ -59,9 +59,9 @@ This is distinct from RAGAS context precision — it's a signal that the vector 
 
 ## Related
 
-- [[architecture/Agent Chain#Retrieval Agent|Retrieval Agent]] — where docs are fetched
+- [[01 - Project Plan|Retrieval Agent]] — where docs are fetched
 - [[metrics/Faithfulness|Faithfulness]] — are answers grounded in those docs?
-- [[observability/Span Types|Span Types]] — retrieval metrics span
+- [[02 - Okahu Logging|Span Types]] — retrieval metrics span
 
 ---
 

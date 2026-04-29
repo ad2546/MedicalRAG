@@ -37,7 +37,7 @@ tags: [case, TB, lymphoma, re-retrieval]
 
 ## Key Finding: Re-Retrieval Is Visible
 
-3 LLM calls instead of 2 = the [[architecture/Agent Chain#Reflection Agent|Reflection Agent]] set `needs_reretrival=True`.
+3 LLM calls instead of 2 = the [[01 - Project Plan|Reflection Agent]] set `needs_reretrival=True`.
 
 In Okahu's trace timeline, this appears as a third `workflow` span — distinct from the 2-call pattern of Case 1. This makes the pipeline's reasoning process transparent: you can see *when* and *why* it decided to go back for more evidence.
 
@@ -50,7 +50,7 @@ The retrieval metrics span flagged this case:
 - This triggered `retrieval_quality_alert` span in Okahu
 - The re-retrieval was the correct response — the first pass was weak
 
-→ [[story/04 - Test Results|Back to Test Results]]
+→ [[05 - Final Result|Back to Final Result]]
 
 ---
 

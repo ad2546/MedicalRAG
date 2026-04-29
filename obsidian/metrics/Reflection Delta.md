@@ -23,7 +23,7 @@ Reflection Delta (Δ) is the signed difference between RAGAS scores from the ini
 
 ## Why This Matters
 
-The [[architecture/Agent Chain#Reflection Agent|Reflection Agent]] exists to improve the initial diagnosis through self-critique. Without measuring the delta, we can't know if:
+The [[01 - Project Plan|Reflection Agent]] exists to improve the initial diagnosis through self-critique. Without measuring the delta, we can't know if:
 - Reflection is helping or hurting
 - Self-critique is producing more grounded answers
 - The re-retrieval loop is adding noise or signal
@@ -70,10 +70,10 @@ When `ragas.regression_detected = True`, the reflection agent hurt quality — t
 
 ## Related
 
-- [[architecture/Agent Chain#Reflection Agent|Reflection Agent]] — the agent being measured
+- [[01 - Project Plan|Reflection Agent]] — the agent being measured
 - [[metrics/Faithfulness|Faithfulness]] — the primary metric
 - [[metrics/Answer Relevancy|Answer Relevancy]] — secondary metric
-- [[observability/Span Types|ragas.reflection_delta span]]
+- [[02 - Okahu Logging|ragas.reflection_delta span]]
 
 ---
 

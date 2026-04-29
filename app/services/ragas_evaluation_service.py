@@ -55,6 +55,7 @@ try:
     from ragas.llms import LangchainLLMWrapper
     from ragas.embeddings import BaseRagasEmbeddings
     from ragas.dataset_schema import SingleTurnSample
+    from ragas.run_config import RunConfig as _RagasRunConfig
     from langchain_openai import ChatOpenAI
     _RAGAS_AVAILABLE = True
     _Faithfulness = Faithfulness
@@ -62,6 +63,7 @@ try:
     _ContextPrecision = LLMContextPrecisionWithoutReference   # no ground truth needed
 except ImportError as _e:
     logger.warning("RAGAS not available — install ragas + langchain-openai: %s", _e)
+    _RagasRunConfig = None  # type: ignore[assignment]
 
 
 # ---------------------------------------------------------------------------
@@ -187,6 +189,16 @@ class RagasEvaluationService:
             self._faithfulness = _Faithfulness(llm=llm)
             self._answer_relevancy = _AnswerRelevancy(llm=llm, embeddings=embeddings)
             self._context_precision = _ContextPrecision(llm=llm)
+
+            # Override RAGAS defaults (max_retries=10, max_wait=60s) with fast-fail
+            # config so our _safe_score key-rotation logic can take over quickly.
+            fast_fail_cfg = _RagasRunConfig(max_retries=0, max_wait=2, timeout=25)
+            for m in (self._faithfulness, self._answer_relevancy, self._context_precision):
+                try:
+                    m.init(run_config=fast_fail_cfg)
+                except Exception:
+                    pass  # init may require LLM already set; ok if it fails silently
+
             logger.info("RAGAS metrics initialised with Groq + sentence-transformers")
             return True
         except Exception as exc:
@@ -208,6 +220,7 @@ class RagasEvaluationService:
             openai_api_base="https://api.groq.com/openai/v1",
             temperature=0.0,
             max_tokens=2048,
+            max_retries=0,   # disable built-in OpenAI retries; our _safe_score rotates keys
         )
 
     # ------------------------------------------------------------------
@@ -240,26 +253,25 @@ class RagasEvaluationService:
 
         question = f"Patient presents with: {', '.join(symptoms)}. What is the differential diagnosis?"
 
-        # Run all four stage evaluations concurrently
-        retrieval_task, initial_task, reflection_task, final_task = await asyncio.gather(
-            self._eval_retrieval(question, contexts, final_answer),
-            self._eval_stage("initial", question, contexts, initial_answer),
-            self._eval_stage("reflection", question, contexts, reflection_answer),
-            self._eval_stage("final", question, contexts, final_answer),
-            return_exceptions=True,
-        )
-
+        # Run stages sequentially to avoid saturating all Groq keys simultaneously.
+        # Each stage makes 2-3 LLM calls; concurrent = 12 calls burst → all keys 429.
+        # Sequential spreads the load; still runs as background task so no user latency.
         def _safe(result, stage: str) -> AgentRagasScore:
             if isinstance(result, Exception):
                 logger.warning("RAGAS %s evaluation failed: %s", stage, result)
                 return AgentRagasScore(stage)
             return result
 
+        retrieval_score = await self._eval_retrieval(question, contexts, final_answer)
+        initial_score = await self._eval_stage("initial", question, contexts, initial_answer)
+        reflection_score = await self._eval_stage("reflection", question, contexts, reflection_answer)
+        final_score = await self._eval_stage("final", question, contexts, final_answer)
+
         result = RagasEvaluationResult(
-            retrieval=_safe(retrieval_task, "retrieval"),
-            initial=_safe(initial_task, "initial"),
-            reflection=_safe(reflection_task, "reflection"),
-            final=_safe(final_task, "final"),
+            retrieval=retrieval_score,
+            initial=initial_score,
+            reflection=reflection_score,
+            final=final_score,
         )
 
         delta = result.reflection_delta
@@ -343,12 +355,20 @@ class RagasEvaluationService:
                         "RAGAS %s hit rate limit — rotating Groq key (attempt %d)",
                         label, attempt + 1,
                     )
-                    # Advance the rotator and rebuild metric LLM
+                    # Advance the rotator and rebuild ALL metric LLMs so subsequent
+                    # calls in this evaluation run also pick up the new key.
                     _groq_rotator._current_idx = (
                         (_groq_rotator._current_idx + 1) % len(_groq_rotator._clients_list())
                     )
                     new_llm = LangchainLLMWrapper(self._make_groq_llm())
-                    metric.llm = new_llm
+                    fast_fail_cfg = _RagasRunConfig(max_retries=0, max_wait=2, timeout=25)
+                    for m in (self._faithfulness, self._answer_relevancy, self._context_precision):
+                        if m is not None:
+                            m.llm = new_llm
+                            try:
+                                m.init(run_config=fast_fail_cfg)
+                            except Exception:
+                                pass
                     continue
                 logger.warning("RAGAS metric %s failed: %s", label, exc)
                 return -1.0

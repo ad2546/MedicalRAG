@@ -55,7 +55,7 @@ The pipeline handled missing vitals correctly:
 
 This behavior is worth testing explicitly — it's a realistic clinical scenario.
 
-→ [[story/04 - Test Results|Back to Test Results]]
+→ [[05 - Final Result|Back to Final Result]]
 
 ---
 
