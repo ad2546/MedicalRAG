@@ -59,13 +59,15 @@ jobs:
           ssh -i ~/.ssh/medrag.pem -o StrictHostKeyChecking=no \
             ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
           set -e
-          cd ~/medrag/deploy
 
-          # Free dangling images and build cache before restarting
+          # Sync deploy/ assets into the root medrag dir that Compose already tracks
+          cp -r ~/medrag/deploy/. ~/medrag/
+          cd ~/medrag
+
+          # Free dangling images before restarting (no build step — pre-built images only)
           docker system prune -f 2>/dev/null || true
           df -h / | tail -1
 
-          # The n8n stack uses only pre-built images (no build:), so --build is a no-op here
           docker compose pull --quiet 2>/dev/null || true
           docker compose up -d --remove-orphans
 
