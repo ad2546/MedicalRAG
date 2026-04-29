@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     # RAG Evaluation — custom LLM-as-judge (faithfulness, context_relevancy, answer_relevancy)
     # Set ENABLE_EVALUATION=true to run these scores after every pipeline call.
     enable_evaluation: bool = False
+    eval_model: str = "llama-3.3-70b-versatile"
+    eval_max_context_chars: int = 4000
+    eval_max_answer_chars: int = 1500
 
     # RAGAS per-agent evaluation (faithfulness, answer_relevancy, context_precision)
     # Evaluated independently for retrieval / initial / reflection / final stages.

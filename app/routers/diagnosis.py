@@ -10,10 +10,9 @@ from app.auth import get_current_user
 from app.database import get_db
 from app.models.db_models import DiagnosisOutput, User
 from app.models.schemas import DiagnosisEntry, DiagnosisResponse
+from app.utils import DISCLAIMER
 
 router = APIRouter(prefix="/diagnosis", tags=["diagnosis"])
-
-DISCLAIMER = "Not a medical diagnosis; consult a clinician before making any clinical decisions."
 
 
 @router.get("/{case_id}", response_model=DiagnosisResponse)

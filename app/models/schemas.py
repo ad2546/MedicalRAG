@@ -3,6 +3,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from app.utils import DISCLAIMER
+
 
 # ── Case input ──────────────────────────────────────────────────────────────
 
@@ -47,7 +49,7 @@ class DiagnosisResponse(BaseModel):
     initial_diagnosis: list[DiagnosisEntry]
     reflection_diagnosis: list[DiagnosisEntry]
     final_diagnosis: list[DiagnosisEntry]
-    disclaimer: str = "Not a medical diagnosis; consult a clinician before making any clinical decisions."
+    disclaimer: str = DISCLAIMER
     remaining_requests: int | None = None
 
 

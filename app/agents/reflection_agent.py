@@ -6,16 +6,9 @@ import uuid
 from app.models.schemas import CaseRequest, DiagnosisEntry, DiagnosisStageResult, RetrievedDocument
 from app.services.llm_service import llm_service
 from app.services.tracing_service import tracing_service
+from app.utils import is_valid_uuid
 
 logger = logging.getLogger(__name__)
-
-
-def _is_valid_uuid(val: str) -> bool:
-    try:
-        uuid.UUID(val)
-        return True
-    except (ValueError, AttributeError):
-        return False
 
 _SYSTEM_PROMPT = """You are a senior clinical reviewer critiquing a differential diagnosis.
 You must return ONLY a JSON object with this exact structure:
@@ -90,7 +83,7 @@ class ReflectionAgent:
             DiagnosisEntry(
                 condition=d["condition"],
                 confidence=d["confidence"],
-                evidence_ids=[uuid.UUID(eid) for eid in d.get("evidence_ids", []) if _is_valid_uuid(eid)],
+                evidence_ids=[uuid.UUID(eid) for eid in d.get("evidence_ids", []) if is_valid_uuid(eid)],
                 reasoning=d.get("reasoning"),
             )
             for d in content.get("diagnoses", [])
@@ -100,7 +93,7 @@ class ReflectionAgent:
             stage="reflection",
             diagnoses=diagnoses,
             reasoning=content.get("reasoning", ""),
-            evidence_ids=[uuid.UUID(eid) for d in content.get("diagnoses", []) for eid in d.get("evidence_ids", []) if _is_valid_uuid(eid)],
+            evidence_ids=[uuid.UUID(eid) for d in content.get("diagnoses", []) for eid in d.get("evidence_ids", []) if is_valid_uuid(eid)],
             needs_reretrival=content.get("needs_reretrival", False),
             missing_evidence_hint=content.get("missing_evidence_hint"),
         )

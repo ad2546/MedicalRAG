@@ -20,9 +20,9 @@ from tenacity import RetryError
 
 from app.config import settings
 from app.database import get_db
-from app.models.db_models import Case
 from app.models.schemas import CaseRequest, DiagnosisResponse
 from app.pipeline import pipeline
+from app.routers.cases import _case_record
 from app.services.cache_service import cache_service
 
 router = APIRouter(prefix="/workflow", tags=["workflow"])
@@ -79,14 +79,7 @@ async def workflow_run(
             cache_stats=cache_service.stats(),
         )
 
-    case_record = Case(
-        id=case_id,
-        symptoms={"items": payload.symptoms},
-        vitals=payload.vitals.model_dump(exclude_none=True),
-        history=payload.history.model_dump(exclude_none=True),
-        labs=payload.labs,
-    )
-    db.add(case_record)
+    db.add(_case_record(case_id, payload))
     await db.commit()
 
     try:

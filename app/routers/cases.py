@@ -16,6 +16,16 @@ from app.pipeline import pipeline
 router = APIRouter(prefix="/case", tags=["cases"])
 
 
+def _case_record(case_id: uuid.UUID, payload: CaseRequest) -> Case:
+    return Case(
+        id=case_id,
+        symptoms={"items": payload.symptoms},
+        vitals=payload.vitals.model_dump(exclude_none=True),
+        history=payload.history.model_dump(exclude_none=True),
+        labs=payload.labs,
+    )
+
+
 @router.post("", response_model=DiagnosisResponse, status_code=201)
 async def submit_case(
     payload: CaseRequest,
@@ -25,14 +35,7 @@ async def submit_case(
     """Submit a new patient case; runs the full RAG pipeline synchronously."""
     case_id = payload.case_id or uuid.uuid4()
 
-    case_record = Case(
-        id=case_id,
-        symptoms={"items": payload.symptoms},
-        vitals=payload.vitals.model_dump(exclude_none=True),
-        history=payload.history.model_dump(exclude_none=True),
-        labs=payload.labs,
-    )
-    db.add(case_record)
+    db.add(_case_record(case_id, payload))
     await db.commit()
 
     try:
@@ -54,13 +57,7 @@ async def submit_case_stream(
     """Submit a case and receive SSE events as each pipeline stage completes."""
     case_id = payload.case_id or uuid.uuid4()
 
-    case_record = Case(
-        id=case_id,
-        symptoms={"items": payload.symptoms},
-        vitals=payload.vitals.model_dump(exclude_none=True),
-        history=payload.history.model_dump(exclude_none=True),
-        labs=payload.labs,
-    )
+    case_record = _case_record(case_id, payload)
     db.add(case_record)
     await db.commit()
 

@@ -7,10 +7,9 @@ from typing import Any
 from pydantic import ValidationError
 
 from app.models.schemas import DiagnosisEntry, DiagnosisResponse, DiagnosisStageResult
+from app.utils import DISCLAIMER
 
 logger = logging.getLogger(__name__)
-
-DISCLAIMER = "Not a medical diagnosis; consult a clinician before making any clinical decisions."
 VALID_CONFIDENCE = {"low", "medium", "high"}
 
 

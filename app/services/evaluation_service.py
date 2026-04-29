@@ -37,9 +37,9 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-_MAX_CONTEXT_CHARS  = 4000   # total chars across all context docs per prompt
-_MAX_ANSWER_CHARS   = 1500   # answer snippet sent to evaluator
-_EVAL_MODEL         = "llama-3.3-70b-versatile"  # same model, eval mode
+_MAX_CONTEXT_CHARS = settings.eval_max_context_chars
+_MAX_ANSWER_CHARS  = settings.eval_max_answer_chars
+_EVAL_MODEL        = settings.eval_model
 
 
 # ---------------------------------------------------------------------------

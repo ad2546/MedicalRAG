@@ -3,16 +3,14 @@
 import asyncio
 import json
 import logging
+import time
 import uuid
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import datetime
-
-# Keep strong references to background tasks so they are not GC'd before completion.
-_background_tasks: set[asyncio.Task] = set()
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import AsyncSessionLocal
 try:
     from monocle_apptrace import amonocle_trace as _amonocle_trace
     _MONOCLE_AVAILABLE = True
@@ -25,6 +23,7 @@ from app.agents.reflection_agent import reflection_agent
 from app.agents.retrieval_agent import retrieval_agent
 from app.agents.validator_agent import validator_agent
 from app.config import settings
+from app.database import AsyncSessionLocal
 from app.models.db_models import DiagnosisOutput, PipelineAudit
 from app.models.schemas import CaseRequest, DiagnosisResponse, DiagnosisStageResult, RetrievedDocument
 from app.services.cache_service import cache_service
@@ -33,10 +32,10 @@ from app.services.ragas_evaluation_service import ragas_evaluation_service
 from app.services.retrieval_metrics_service import retrieval_metrics_service
 from app.services.tracing_service import tracing_service
 
+# Keep strong references to background tasks so they are not GC'd before completion.
+_background_tasks: set[asyncio.Task] = set()
+
 logger = logging.getLogger(__name__)
-
-
-from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def _agent_span(span_name: str, span_type: str = "inference"):
@@ -124,7 +123,7 @@ class DiagnosisPipeline:
             _t.add_done_callback(_background_tasks.discard)
             return DiagnosisResponse(**cached)
 
-        import time
+
 
         # ── Step 1: Initial retrieval ────────────────────────────────────────
         t0 = time.perf_counter()
