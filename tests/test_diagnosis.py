@@ -1,6 +1,5 @@
 """Tests for Diagnosis Agent and Reflection Agent."""
 
-import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -8,7 +7,6 @@ import pytest
 from app.agents.diagnosis_agent import DiagnosisAgent
 from app.agents.reflection_agent import ReflectionAgent
 from app.models.schemas import DiagnosisStageResult
-
 
 MOCK_LLM_DIAGNOSIS = {
     "diagnoses": [

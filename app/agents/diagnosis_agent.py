@@ -1,6 +1,5 @@
 """Diagnosis Agent — generates an initial differential diagnosis via LLM."""
 
-import json
 import logging
 import uuid
 

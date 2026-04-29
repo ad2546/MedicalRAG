@@ -7,7 +7,6 @@ import pytest
 
 from app.services.evaluation_service import EvaluationResult, EvaluationService
 
-
 # ---------------------------------------------------------------------------
 # EvaluationResult
 # ---------------------------------------------------------------------------

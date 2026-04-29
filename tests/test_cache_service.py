@@ -1,12 +1,8 @@
 """Tests for cache_service.py — CacheService and GlobalRateLimiter."""
 
 from datetime import UTC, datetime
-from unittest.mock import patch
-
-import pytest
 
 from app.services.cache_service import CacheService, GlobalRateLimiter
-
 
 # ---------------------------------------------------------------------------
 # GlobalRateLimiter

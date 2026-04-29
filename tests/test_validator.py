@@ -2,8 +2,6 @@
 
 import uuid
 
-import pytest
-
 from app.agents.validator_agent import ValidatorAgent
 from app.models.schemas import DiagnosisEntry, DiagnosisStageResult
 

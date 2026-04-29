@@ -1,7 +1,6 @@
 """Extended tests for LLMService._achat_groq internals and cache integration."""
 
-import json
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 

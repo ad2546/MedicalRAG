@@ -1,12 +1,12 @@
 """Tests for /auth router — signup, login, logout, /me."""
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.auth import create_access_token, get_current_user
+from app.auth import get_current_user
 from app.database import get_db
 from app.main import app
 from app.models.db_models import User

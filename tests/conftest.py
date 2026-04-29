@@ -1,14 +1,9 @@
 """Shared test fixtures."""
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-import pytest_asyncio
-from fastapi.testclient import TestClient
-from httpx import ASGITransport, AsyncClient
 
-from app.main import app
 from app.models.schemas import (
     CaseRequest,
     DiagnosisEntry,

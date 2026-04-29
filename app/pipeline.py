@@ -25,7 +25,11 @@ from app.agents.validator_agent import validator_agent
 from app.config import settings
 from app.database import AsyncSessionLocal
 from app.models.db_models import DiagnosisOutput, PipelineAudit
-from app.models.schemas import CaseRequest, DiagnosisResponse, DiagnosisStageResult, RetrievedDocument
+from app.models.schemas import (
+    CaseRequest,
+    DiagnosisResponse,
+    DiagnosisStageResult,
+)
 from app.services.cache_service import cache_service
 from app.services.evaluation_service import evaluation_service
 from app.services.ragas_evaluation_service import ragas_evaluation_service

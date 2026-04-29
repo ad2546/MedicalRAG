@@ -10,7 +10,7 @@ from tenacity import RetryError
 from app.auth import UserQuota, consume_user_request_quota
 from app.database import get_db
 from app.models.db_models import Case
-from app.models.schemas import CaseRequest, CaseResponse, DiagnosisResponse
+from app.models.schemas import CaseRequest, DiagnosisResponse
 from app.pipeline import pipeline
 
 router = APIRouter(prefix="/case", tags=["cases"])

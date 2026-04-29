@@ -21,7 +21,7 @@ top_score_bucket       str   – "excellent" ≥0.85 | "good" ≥0.70 | "fair" �
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from app.models.schemas import RetrievedDocument
 

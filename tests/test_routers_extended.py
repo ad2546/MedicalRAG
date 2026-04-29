@@ -10,8 +10,6 @@ from httpx import ASGITransport, AsyncClient
 from app.auth import UserQuota, consume_user_request_quota, get_current_user
 from app.database import get_db
 from app.main import app
-from app.models.schemas import DiagnosisEntry, DiagnosisResponse
-
 
 DISCLAIMER = "Not a medical diagnosis; consult a clinician before making any clinical decisions."
 
@@ -231,7 +229,7 @@ class TestRagasEvaluationServiceFallback:
         assert result.final.overall == -1.0
 
     def test_reflection_delta_not_computed_when_scores_negative(self):
-        from app.services.ragas_evaluation_service import AgentRagasScore, RagasEvaluationResult
+        from app.services.ragas_evaluation_service import RagasEvaluationResult
         result = RagasEvaluationResult()  # all scores -1.0
         delta = result.reflection_delta
         assert delta["ragas.delta.faithfulness"] == -999.0

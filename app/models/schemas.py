@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 
 from app.utils import DISCLAIMER
 
-
 # ── Case input ──────────────────────────────────────────────────────────────
 
 class VitalsSchema(BaseModel):

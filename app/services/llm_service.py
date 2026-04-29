@@ -125,6 +125,7 @@ def _get_oci_client():
     global _oci_client
     if _oci_client is None:
         import os
+
         import oci
         import oci.auth.signers
         import oci.config

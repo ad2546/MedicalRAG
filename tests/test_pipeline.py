@@ -16,7 +16,6 @@ from app.models.schemas import (
 )
 from app.pipeline import DiagnosisPipeline
 
-
 DISCLAIMER = "Not a medical diagnosis; consult a clinician before making any clinical decisions."
 
 

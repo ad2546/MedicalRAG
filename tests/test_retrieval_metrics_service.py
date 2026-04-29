@@ -2,8 +2,6 @@
 
 import uuid
 
-import pytest
-
 from app.models.schemas import RetrievedDocument
 from app.services.retrieval_metrics_service import RetrievalMetricsService
 

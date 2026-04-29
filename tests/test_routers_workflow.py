@@ -9,7 +9,6 @@ from httpx import ASGITransport, AsyncClient
 from app.database import get_db
 from app.main import app
 
-
 VALID_KEY = "test-workflow-secret"
 
 CASE_PAYLOAD = {
@@ -75,7 +74,7 @@ class TestWorkflowRun:
     async def test_cache_hit_returns_without_pipeline(self, monkeypatch):
         monkeypatch.setattr("app.routers.workflow.settings.workflow_api_key", VALID_KEY)
         case_id = uuid.uuid4()
-        from app.models.schemas import DiagnosisEntry, DiagnosisResponse
+        from app.models.schemas import DiagnosisResponse
 
         cached = DiagnosisResponse(
             case_id=case_id,
@@ -110,7 +109,7 @@ class TestWorkflowRun:
     async def test_pipeline_run_called_on_cache_miss(self, monkeypatch):
         monkeypatch.setattr("app.routers.workflow.settings.workflow_api_key", VALID_KEY)
         case_id = uuid.uuid4()
-        from app.models.schemas import DiagnosisEntry, DiagnosisResponse
+        from app.models.schemas import DiagnosisResponse
 
         pipeline_response = DiagnosisResponse(
             case_id=case_id,
@@ -158,7 +157,6 @@ class TestWorkflowCacheOps:
     @pytest.mark.asyncio
     async def test_delete_cache_returns_204(self, monkeypatch):
         monkeypatch.setattr("app.routers.workflow.settings.workflow_api_key", VALID_KEY)
-        from app.services.cache_service import cache_service
 
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.delete(

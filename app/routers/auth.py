@@ -1,8 +1,8 @@
 import re
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import create_access_token, get_current_user, hash_password, verify_password

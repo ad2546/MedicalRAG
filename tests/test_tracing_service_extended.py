@@ -1,8 +1,7 @@
 """Extended tests for tracing_service — trace_retrieval_metrics, trace_evaluation,
 trace_ragas_evaluation. Complements test_tracing_service.py."""
 
-from unittest.mock import MagicMock, patch
-import pytest
+from unittest.mock import MagicMock
 
 
 def _patch_tracer(monkeypatch):
@@ -80,8 +79,9 @@ class TestTraceRetrievalMetrics:
     def test_no_op_when_tracer_is_none(self, monkeypatch, caplog):
         import app.services.tracing_service as ts
         monkeypatch.setattr(ts, "_otel_tracer", None)
-        from app.services.tracing_service import tracing_service
         import logging
+
+        from app.services.tracing_service import tracing_service
 
         with caplog.at_level(logging.DEBUG, logger="app.services.tracing_service"):
             tracing_service.trace_retrieval_metrics("t", {"retrieval.hit_rate": 1.0})
@@ -129,8 +129,9 @@ class TestTraceEvaluation:
     def test_no_op_when_tracer_is_none(self, monkeypatch, caplog):
         import app.services.tracing_service as ts
         monkeypatch.setattr(ts, "_otel_tracer", None)
-        from app.services.tracing_service import tracing_service
         import logging
+
+        from app.services.tracing_service import tracing_service
 
         with caplog.at_level(logging.DEBUG, logger="app.services.tracing_service"):
             tracing_service.trace_evaluation("t", {"eval.faithfulness": 0.8})
@@ -170,8 +171,8 @@ class TestTraceRagasEvaluation:
         fake_tracer, _ = _patch_tracer(monkeypatch)
         spans = [MagicMock() for _ in range(6)]
         fake_tracer.start_span.side_effect = spans
-        from app.services.tracing_service import tracing_service
         from app.services.ragas_evaluation_service import AgentRagasScore, RagasEvaluationResult
+        from app.services.tracing_service import tracing_service
 
         # Reflection faithfulness lower than initial → regression
         result = RagasEvaluationResult(
@@ -190,8 +191,9 @@ class TestTraceRagasEvaluation:
     def test_no_op_when_tracer_is_none(self, monkeypatch, caplog):
         import app.services.tracing_service as ts
         monkeypatch.setattr(ts, "_otel_tracer", None)
-        from app.services.tracing_service import tracing_service
         import logging
+
+        from app.services.tracing_service import tracing_service
 
         result = self._make_ragas_result()
         with caplog.at_level(logging.DEBUG, logger="app.services.tracing_service"):
