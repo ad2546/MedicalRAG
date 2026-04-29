@@ -28,6 +28,7 @@ logged at WARNING level and never propagate to the caller.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from dataclasses import dataclass, field
 
@@ -51,12 +52,11 @@ except ImportError:
     pass
 
 try:
-    from ragas.metrics import Faithfulness, AnswerRelevancy, LLMContextPrecisionWithoutReference
-    from ragas.llms import LangchainLLMWrapper
-    from ragas.embeddings import BaseRagasEmbeddings
-    from ragas.dataset_schema import SingleTurnSample
-    from ragas.run_config import RunConfig as _RagasRunConfig
     from langchain_openai import ChatOpenAI
+    from ragas.dataset_schema import SingleTurnSample
+    from ragas.llms import LangchainLLMWrapper
+    from ragas.metrics import AnswerRelevancy, Faithfulness, LLMContextPrecisionWithoutReference
+    from ragas.run_config import RunConfig as _RagasRunConfig
     _RAGAS_AVAILABLE = True
     _Faithfulness = Faithfulness
     _AnswerRelevancy = AnswerRelevancy
@@ -194,10 +194,8 @@ class RagasEvaluationService:
             # config so our _safe_score key-rotation logic can take over quickly.
             fast_fail_cfg = _RagasRunConfig(max_retries=0, max_wait=2, timeout=25)
             for m in (self._faithfulness, self._answer_relevancy, self._context_precision):
-                try:
+                with contextlib.suppress(Exception):
                     m.init(run_config=fast_fail_cfg)
-                except Exception:
-                    pass  # init may require LLM already set; ok if it fails silently
 
             logger.info("RAGAS metrics initialised with Groq + sentence-transformers")
             return True
@@ -365,10 +363,8 @@ class RagasEvaluationService:
                     for m in (self._faithfulness, self._answer_relevancy, self._context_precision):
                         if m is not None:
                             m.llm = new_llm
-                            try:
+                            with contextlib.suppress(Exception):
                                 m.init(run_config=fast_fail_cfg)
-                            except Exception:
-                                pass
                     continue
                 logger.warning("RAGAS metric %s failed: %s", label, exc)
                 return -1.0

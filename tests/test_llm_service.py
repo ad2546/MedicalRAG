@@ -7,7 +7,6 @@ import pytest
 
 from app.services.llm_service import LLMService, _GroqKeyRotator
 
-
 # ---------------------------------------------------------------------------
 # _GroqKeyRotator
 # ---------------------------------------------------------------------------
@@ -152,7 +151,7 @@ class TestExtractJson:
 
     def test_raises_on_unrecoverable_json(self):
         svc = LLMService()
-        with pytest.raises(Exception):
+        with pytest.raises((ValueError, json.JSONDecodeError)):
             svc._extract_json("not json at all #### $$$$")
 
 

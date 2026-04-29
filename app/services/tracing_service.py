@@ -17,10 +17,14 @@ from __future__ import annotations
 import logging
 import os
 import uuid
+from collections.abc import Sequence
 from contextlib import asynccontextmanager
-from typing import Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 from app.config import settings
+
+if TYPE_CHECKING:
+    from app.services.ragas_evaluation_service import RagasEvaluationResult
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +44,7 @@ class _LoggingOkahuExporter:
 
     def export(self, spans: Sequence) -> Any:
         import json as _json
+
         from monocle_apptrace.instrumentation.common.constants import MONOCLE_SDK_VERSION
 
         monocle_spans = [s for s in spans if s.attributes.get(MONOCLE_SDK_VERSION)]
@@ -141,14 +146,14 @@ def _init_tracer() -> None:
         # Belt-and-suspenders: unwrap any FastAPI/Starlette route instrumentors
         # that may have been registered before this call.
         try:
-            from opentelemetry.instrumentation.utils import unwrap as _unwrap
             import fastapi.routing as _fr
+            from opentelemetry.instrumentation.utils import unwrap as _unwrap
             _unwrap(_fr.APIRoute, "handle")
         except Exception:
             pass
         try:
-            from opentelemetry.instrumentation.utils import unwrap as _unwrap
             import starlette.responses as _sr
+            from opentelemetry.instrumentation.utils import unwrap as _unwrap
             _unwrap(_sr.Response, "__call__")
         except Exception:
             pass
@@ -307,7 +312,7 @@ class TracingService:
     def trace_ragas_evaluation(
         self,
         trace_id: str,
-        result: "RagasEvaluationResult",
+        result: RagasEvaluationResult,
     ) -> None:
         """
         Export per-agent RAGAS scores to Okahu Cloud as individual OTel spans.

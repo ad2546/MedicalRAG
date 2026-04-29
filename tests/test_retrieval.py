@@ -1,7 +1,7 @@
 """Tests for the Retrieval Agent."""
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -43,7 +43,7 @@ async def test_retrieval_agent_passes_hint(sample_case):
     """When a hint is provided it should be appended to the query."""
     from app.services.embedding_service import embedding_service
 
-    with patch.object(embedding_service, "embed", return_value=[0.0] * 384) as mock_embed, \
+    with patch.object(embedding_service, "embed", return_value=[0.0] * 384), \
          patch.object(embedding_service, "build_query", wraps=embedding_service.build_query) as mock_build:
 
         agent = RetrievalAgent()

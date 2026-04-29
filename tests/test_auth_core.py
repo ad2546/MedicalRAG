@@ -7,7 +7,6 @@ import pytest
 from fastapi import HTTPException
 
 from app.auth import (
-    UserQuota,
     consume_user_request_quota,
     create_access_token,
     decode_access_token,
@@ -15,7 +14,6 @@ from app.auth import (
     hash_password,
     verify_password,
 )
-
 
 # ---------------------------------------------------------------------------
 # Password hashing
@@ -71,14 +69,16 @@ class TestAccessToken:
         assert exc_info.value.status_code == 401
 
     def test_expired_token_raises_401(self, monkeypatch):
-        from datetime import UTC, datetime, timedelta
-        import app.auth as auth_module
+        from datetime import UTC, datetime
+
 
         # Patch timedelta so expiry is in the past
-        original_create = create_access_token
-
         def make_expired_token(user_id, email):
-            import base64, hashlib, hmac, json
+            import base64
+            import hashlib
+            import hmac
+            import json
+
             from app.config import settings
 
             expiry = datetime(2000, 1, 1, tzinfo=UTC)
@@ -167,9 +167,9 @@ class TestConsumeUserRequestQuota:
         mock_limiter = MagicMock()
         mock_limiter.check_and_increment.return_value = False
 
-        with patch("app.auth.get_global_rate_limiter", return_value=mock_limiter):
-            with pytest.raises(HTTPException) as exc_info:
-                await consume_user_request_quota(user=fake_user, db=mock_db)
+        with patch("app.auth.get_global_rate_limiter", return_value=mock_limiter), \
+             pytest.raises(HTTPException) as exc_info:
+            await consume_user_request_quota(user=fake_user, db=mock_db)
         assert exc_info.value.status_code == 429
 
     @pytest.mark.asyncio
@@ -187,9 +187,9 @@ class TestConsumeUserRequestQuota:
         mock_db.execute = AsyncMock(return_value=mock_updated)
         mock_db.rollback = AsyncMock()
 
-        with patch("app.auth.get_global_rate_limiter", return_value=mock_limiter):
-            with pytest.raises(HTTPException) as exc_info:
-                await consume_user_request_quota(user=fake_user, db=mock_db)
+        with patch("app.auth.get_global_rate_limiter", return_value=mock_limiter), \
+             pytest.raises(HTTPException) as exc_info:
+            await consume_user_request_quota(user=fake_user, db=mock_db)
         assert exc_info.value.status_code == 429
 
     @pytest.mark.asyncio

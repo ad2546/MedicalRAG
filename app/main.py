@@ -6,7 +6,6 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
-from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config import settings
@@ -15,11 +14,12 @@ from app.config import settings
 logging.basicConfig(level=getattr(logging, settings.log_level.upper(), logging.INFO))
 logger = logging.getLogger(__name__)
 
-from app.database import init_db, is_database_available
-from app.routers import auth, cases, chat, diagnosis, documents, workflow
+from app.database import init_db, is_database_available  # noqa: E402
+from app.routers import auth, cases, chat, diagnosis, documents, workflow  # noqa: E402
+
 # Import tracing after logging is configured — registers OTel provider before any LLM client
-from app.services import tracing_service  # noqa: F401
-from app.services.cache_service import cache_service, get_global_rate_limiter
+from app.services import tracing_service  # noqa: E402, F401
+from app.services.cache_service import cache_service, get_global_rate_limiter  # noqa: E402
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

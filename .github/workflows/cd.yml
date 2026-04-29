@@ -1,0 +1,120 @@
+name: CD — Deploy to EC2
+
+on:
+  push:
+    branches: ["master", "main"]
+    paths:
+      - "app/**"
+      - "deploy/**"
+      - "migrations/**"
+      - "requirements.txt"
+      - ".github/workflows/cd.yml"
+
+  # Manual trigger with optional reason
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: "Reason for manual deploy"
+        required: false
+        default: "manual"
+
+# Only one deploy at a time
+concurrency:
+  group: deploy-ec2
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Write SSH key ────────────────────────────────────────────────────
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/medrag.pem
+          chmod 600 ~/.ssh/medrag.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      # ── Sync app code + deploy assets to EC2 ────────────────────────────
+      - name: Sync files
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.venv' \
+            --exclude '__pycache__' \
+            --exclude '*.pyc' \
+            --exclude 'htmlcov' \
+            --exclude '.env' \
+            -e "ssh -i ~/.ssh/medrag.pem -o StrictHostKeyChecking=no" \
+            ./ ubuntu@${{ secrets.EC2_HOST }}:~/medrag/
+
+      # ── Restart Python API (if running FastAPI stack) ───────────────────
+      - name: Restart API
+        run: |
+          ssh -i ~/.ssh/medrag.pem -o StrictHostKeyChecking=no \
+            ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          set -e
+          cd ~/medrag
+
+          # Rebuild and restart only the changed services
+          docker compose pull --quiet 2>/dev/null || true
+          docker compose up -d --build --remove-orphans
+
+          # Wait for n8n to become ready (up to 60s)
+          for i in $(seq 1 12); do
+            if curl -sf http://localhost:5678/healthz > /dev/null 2>&1; then
+              echo "n8n ready"
+              break
+            fi
+            echo "waiting for n8n ($i/12)..."
+            sleep 5
+          done
+
+          docker compose ps
+          ENDSSH
+
+      # ── Smoke test ───────────────────────────────────────────────────────
+      - name: Smoke test
+        run: |
+          ssh -i ~/.ssh/medrag.pem -o StrictHostKeyChecking=no \
+            ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          set -e
+          # Login and run a diagnose call; fail deploy if it errors
+          TOKEN=$(curl -sf -X POST http://localhost:5678/webhook/login \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"ci@test.internal","password":"CIsmoke1!"}' \
+            | python3 -c "import sys,json;print(json.loads(sys.stdin.read()).get('token',''))" || echo "")
+
+          if [ -z "$TOKEN" ]; then
+            # User may not exist yet — create it
+            TOKEN=$(curl -sf -X POST http://localhost:5678/webhook/signup \
+              -H 'Content-Type: application/json' \
+              -d '{"email":"ci@test.internal","password":"CIsmoke1!"}' \
+              | python3 -c "import sys,json;print(json.loads(sys.stdin.read()).get('token',''))")
+          fi
+
+          [ -z "$TOKEN" ] && { echo "FATAL: could not obtain token"; exit 1; }
+
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+            -X POST http://localhost:5678/webhook/diagnose \
+            -H "Authorization: Bearer $TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{}')
+
+          echo "diagnose HTTP status: $STATUS"
+          [ "$STATUS" = "200" ] || { echo "FATAL: smoke test failed (HTTP $STATUS)"; exit 1; }
+          echo "smoke test passed"
+          ENDSSH
+
+      - name: Notify success
+        if: success()
+        run: echo "Deploy to ${{ secrets.EC2_HOST }} succeeded on $(date -u)"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "Deploy FAILED — check logs above"
