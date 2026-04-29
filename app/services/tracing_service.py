@@ -229,7 +229,7 @@ class TracingService:
         span.set_attribute("trace_id", trace_id)
         span.set_attribute("span.type", "retrieval")
         for k, v in metrics.items():
-            span.set_attribute(k, str(v) if not isinstance(v, (int, float, bool)) else v)
+            span.set_attribute(k, str(v) if not isinstance(v, int | float | bool) else v)
         span.end()
 
         hit_rate = metrics.get("retrieval.hit_rate", 1.0)
