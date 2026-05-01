@@ -10,24 +10,32 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:           #F8F5F0;
+      --bg:           #FAF8F4;
+      --bg-2:         #F4F0E8;
       --surface:      #FFFFFF;
-      --surface-2:    #F1EDE6;
-      --border:       #DDD8CF;
-      --border-hover: #C5BEB3;
-      --text-dim:     #A09890;
-      --text:         #6B6058;
-      --text-mid:     #3D3530;
-      --text-bright:  #1A1410;
-      --accent:       #B91C1C;
-      --accent-dim:   rgba(185,28,28,0.07);
+      --surface-2:    #F7F4EF;
+      --dark:         #1C1917;
+      --dark-2:       #292421;
+      --border:       #E6DFD3;
+      --border-2:     #CEC5B8;
+      --text-dim:     #9C9189;
+      --text:         #5C504A;
+      --text-mid:     #5C504A;
+      --text-bright:  #1C1917;
+      --accent:       #D97757;
+      --accent-dark:  #C0623D;
+      --accent-dim:   rgba(217,119,87,0.10);
+      --accent-border:rgba(217,119,87,0.30);
       --high:         #166534;
-      --high-dim:     rgba(22,101,52,0.07);
+      --high-dim:     rgba(22,101,52,0.08);
       --medium:       #92400E;
-      --medium-dim:   rgba(146,64,14,0.07);
+      --medium-dim:   rgba(146,64,14,0.08);
       --low:          #B91C1C;
       --low-dim:      rgba(185,28,28,0.07);
-      --radius:       3px;
+      --radius:       4px;
+      --font-serif:   'Spectral', Georgia, serif;
+      --font-sans:    'IBM Plex Sans', system-ui, sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
     }
 
     html { font-size: 16px; }
@@ -46,15 +54,14 @@
     /* ── HEADER ── */
     header {
       border-bottom: 1px solid var(--border);
-      padding: 0 2rem;
+      padding: 0 28px;
       height: 54px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       position: sticky;
       top: 0;
-      background: rgba(248,245,240,0.96);
-      backdrop-filter: blur(10px);
+      background: var(--surface);
       z-index: 100;
       flex-shrink: 0;
     }
@@ -122,34 +129,113 @@
       text-align: center;
     }
 
-    .logout-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-mid);
-      cursor: pointer;
-      font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 0.74rem;
-      min-height: 32px;
-      padding: 0 10px;
-      transition: border-color 0.15s, color 0.15s;
+    /* ── PIPELINE BAR ── */
+    .pipeline-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 11px 28px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      flex-shrink: 0;
+      overflow-x: auto;
     }
-    .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .pipeline-label {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      margin-right: 24px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .pipeline-stages {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .pipe-stage {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .pipe-circle {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+    .pipe-circle.pipe-pending {
+      border: 1.5px solid var(--border-2);
+    }
+    .pipe-circle.pipe-active {
+      background: var(--accent-dim);
+      border: 1.5px solid var(--accent);
+    }
+    .pipe-circle.pipe-done {
+      background: var(--high);
+      border: 1.5px solid var(--high);
+    }
+    .pipe-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--border-2);
+    }
+    .pipe-circle.pipe-active .pipe-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent);
+      border-top-color: transparent;
+      background: transparent;
+      animation: spin 0.7s linear infinite;
+    }
+    .pipe-circle.pipe-done .pipe-dot {
+      display: none;
+    }
+    .pipe-check {
+      display: none;
+    }
+    .pipe-circle.pipe-done .pipe-check {
+      display: block;
+    }
+    .pipe-name {
+      font-family: var(--font-sans);
+      font-size: 11.5px;
+      color: var(--text-dim);
+      font-weight: 400;
+      transition: color 0.3s, font-weight 0.3s;
+      white-space: nowrap;
+    }
+    .pipe-stage.stage-active .pipe-name { color: var(--accent); font-weight: 600; }
+    .pipe-stage.stage-done   .pipe-name { color: var(--text-bright); font-weight: 600; }
+    .pipe-connector {
+      height: 1.5px;
+      width: 32px;
+      background: var(--border);
+      margin: 0 10px;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .pipe-connector.done { background: var(--high); }
 
     /* ── LAYOUT ── */
     main {
       flex: 1;
       display: grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 360px 1fr;
       overflow: hidden;
-      height: calc(100vh - 54px);
+      height: calc(100vh - 54px - 44px);
     }
 
     /* ── FORM PANEL ── */
     .form-panel {
       border-right: 1px solid var(--border);
       overflow-y: auto;
-      padding: 2rem 1.75rem;
+      padding: 1.5rem 1.375rem;
       display: flex;
       flex-direction: column;
       gap: 2rem;
@@ -254,18 +340,19 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 2px;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      color: var(--text-mid);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 3px;
+      padding: 3px 9px;
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 500;
     }
 
     .tag-remove {
       background: none;
       border: none;
-      color: var(--text-dim);
+      color: var(--accent);
       cursor: pointer;
       padding: 0;
       display: flex;
@@ -273,7 +360,7 @@
       min-width: 14px;
       min-height: 14px;
     }
-    .tag-remove:hover { color: var(--accent); }
+    .tag-remove:hover { color: var(--accent-dark); }
 
     .tag-input {
       background: none;
@@ -405,6 +492,9 @@
     .submit-btn.loading .btn-text  { display: none; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px) } to { opacity:1; transform:translateY(0) } }
+
     .pip-spinner {
       width: 10px; height: 10px; border-radius: 50%;
       border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
@@ -422,19 +512,20 @@
     }
 
     .example-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text-dim);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 3px;
+      color: var(--accent);
       cursor: pointer;
-      font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 0.75rem;
-      padding: 6px 12px;
-      transition: border-color 0.15s, color 0.15s;
-      min-height: 44px;
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 5px 11px;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 30px;
     }
-    .example-btn:hover { border-color: var(--text-mid); color: var(--text-mid); }
-    .example-btn:focus-visible { outline: 2px solid var(--text-bright); outline-offset: 2px; }
+    .example-btn:hover { background: rgba(217,119,87,0.16); }
+    .example-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     /* ── RESULTS PANEL ── */
     .results-panel {
@@ -653,7 +744,7 @@
     }
     .stage-tab.active .tab-count {
       background: var(--accent-dim);
-      border-color: rgba(185,28,28,0.18);
+      border-color: var(--accent-border);
       color: var(--accent);
     }
 
@@ -809,7 +900,7 @@
       position: fixed;
       z-index: 201;
       background: var(--surface);
-      border: 1px solid var(--border-hover);
+      border: 1px solid var(--border-2);
       border-radius: 4px;
       padding: 1.25rem;
       width: 380px;
@@ -889,19 +980,19 @@
       width: 48px;
       height: 48px;
       border-radius: 24px;
-      background: #ffffff;
+      background: var(--dark);
       border: none;
       cursor: pointer;
       display: none;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 12px rgba(255, 255, 255, 0.18), 0 1px 4px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 20px rgba(28,23,20,0.18);
       z-index: 150;
       transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+      color: white;
     }
     .chat-fab:hover {
       background: var(--accent);
-      box-shadow: 0 4px 20px rgba(185,28,28,0.25), 0 2px 6px rgba(185,28,28,0.12);
       transform: translateY(-1px);
     }
     .chat-fab:active { transform: translateY(0); }
@@ -913,14 +1004,14 @@
       position: fixed;
       bottom: 5rem;
       right: 1.5rem;
-      width: 400px;
+      width: 460px;
       max-width: calc(100vw - 2rem);
-      height: 520px;
+      height: 560px;
       max-height: calc(100vh - 8rem);
       background: var(--surface);
-      border: 1px solid var(--border-hover);
+      border: 1px solid var(--border-2);
       border-radius: 6px;
-      box-shadow: 0 16px 48px rgba(26,20,16,0.16), 0 4px 12px rgba(26,20,16,0.07);
+      box-shadow: 0 20px 60px rgba(28,23,20,0.14);
       z-index: 151;
       display: none;
       flex-direction: column;
@@ -935,7 +1026,7 @@
       padding: 1rem 1.25rem;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
-      background: var(--surface-2);
+      background: var(--surface);
     }
 
     .chat-title {
@@ -955,7 +1046,7 @@
       padding: 2px 6px;
       border-radius: 2px;
       background: var(--accent-dim);
-      border: 1px solid rgba(185,28,28,0.18);
+      border: 1px solid var(--accent-border);
       color: var(--accent);
       text-transform: uppercase;
       letter-spacing: 0.06em;
@@ -983,6 +1074,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.875rem;
+      background: var(--bg);
     }
     .chat-messages::-webkit-scrollbar { width: 3px; }
     .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -1006,14 +1098,14 @@
     .chat-msg.user .chat-bubble {
       background: var(--text-bright);
       color: var(--bg);
-      border-bottom-right-radius: 2px;
+      border-radius: 10px 10px 2px 10px;
     }
 
     .chat-msg.assistant .chat-bubble {
       background: var(--surface-2);
       border: 1px solid var(--border);
       color: var(--text-mid);
-      border-bottom-left-radius: 2px;
+      border-radius: 10px 10px 10px 2px;
     }
 
     .chat-msg-time {
@@ -1113,7 +1205,7 @@
       border-left: 3px solid rgba(146,64,14,0.35);
       border-radius: var(--radius);
       font-size: 0.72rem;
-      color: var(--text-dim);
+      color: var(--medium);
       line-height: 1.65;
       display: flex;
       gap: 10px;
@@ -1152,8 +1244,18 @@
 
 <header>
   <div class="header-left">
-    <span class="app-name">Medical<span>RAG</span></span>
-    <span class="env-badge" id="envBadge">Dev</span>
+    <div class="logo" style="display:flex;align-items:center;gap:9px;">
+      <svg width="28" height="28" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+        <rect width="30" height="30" rx="7" fill="#D97757"/>
+        <path d="M9 15 C9 10 15 10 15 15 C15 20 21 20 21 15" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <circle cx="9" cy="15" r="1.8" fill="white"/>
+        <circle cx="21" cy="15" r="1.8" fill="white"/>
+      </svg>
+      <div style="display:flex;flex-direction:column;gap:1px;">
+        <span class="app-name">Medical<span>RAG</span></span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--text-dim);letter-spacing:0.04em;">by Atharva</span>
+      </div>
+    </div>
   </div>
   <div class="header-right">
     <span class="quota-badge" id="quotaBadge">Requests: --/--</span>
@@ -1161,9 +1263,39 @@
       <div class="health-dot" id="healthDot"></div>
       <span id="healthLabel">Checking</span>
     </div>
-    <button class="logout-btn" type="button" onclick="logout()">Logout</button>
+    <div style="width:30px;height:30px;border-radius:50%;background:var(--dark);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;" onclick="logout()" title="Logout" aria-label="Logout">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+        <path d="M5 12H3a1 1 0 01-1-1V3a1 1 0 011-1h2M9.5 9.5L12 7l-2.5-2.5M12 7H5.5" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <span id="envBadge" style="display:none"></span>
   </div>
 </header>
+
+<div class="pipeline-bar" id="pipelineBar" aria-label="Pipeline stages">
+  <span class="pipeline-label">Pipeline</span>
+  <div class="pipeline-stages" id="pipelineStages">
+    <div class="pipe-stage" id="pipe-retrieval">
+      <div class="pipe-circle pipe-pending"><div class="pipe-dot"></div></div>
+      <span class="pipe-name">Retrieval</span>
+    </div>
+    <div class="pipe-connector" id="conn-retrieval-diagnosis"></div>
+    <div class="pipe-stage" id="pipe-diagnosis">
+      <div class="pipe-circle pipe-pending"><div class="pipe-dot"></div></div>
+      <span class="pipe-name">Diagnosis</span>
+    </div>
+    <div class="pipe-connector" id="conn-diagnosis-reflection"></div>
+    <div class="pipe-stage" id="pipe-reflection">
+      <div class="pipe-circle pipe-pending"><div class="pipe-dot"></div></div>
+      <span class="pipe-name">Reflection</span>
+    </div>
+    <div class="pipe-connector" id="conn-reflection-validation"></div>
+    <div class="pipe-stage" id="pipe-validation">
+      <div class="pipe-circle pipe-pending"><div class="pipe-dot"></div></div>
+      <span class="pipe-name">Validation</span>
+    </div>
+  </div>
+</div>
 
 <main>
   <!-- ── CASE FORM ── -->
